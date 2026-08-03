@@ -115,6 +115,18 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* OVERLAY SIDEBAR MOBILE */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
         /* SIDEBAR */
         .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100%; display: flex; flex-direction: column; z-index: 100; border-right: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px);}
         .sidebar-brand { padding: 30px 24px; border-bottom: 1px solid var(--glass-border); position: relative; text-align: center;}
@@ -168,6 +180,11 @@
         /* MAIN CONTENT */
         .main-content { margin-left: var(--sidebar-width); min-height: 100vh; padding: 30px 40px; transition: var(--transition); }
         .header-panel { border-radius: 16px; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 20px; }
+        
+        .page-title-wrapper { display: flex; align-items: center; gap: 15px; }
+        .btn-mobile-menu { display: none; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; box-shadow: var(--glass-shadow); transition: var(--transition); }
+        .btn-mobile-menu:active { transform: scale(0.95); }
+
         .page-title h1 { font-size: 24px; font-weight: 700; color: var(--text-main); text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
         .page-title p { color: var(--text-muted); font-size: 13px; margin-top: 3px; font-weight: 500; }
         .action-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -179,7 +196,7 @@
         .search-input:focus { background-color: rgba(255, 255, 255, 0.9); box-shadow: inset 0 2px 5px rgba(148,163,184,0.1), 0 0 15px rgba(255,255,255,0.5); }
         
         .action-buttons { display: flex; gap: 12px; }
-        .btn { position: relative; overflow: hidden; padding: 11px 20px; border-radius: 10px; border: 1px solid var(--glass-border); cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; transition: var(--transition); box-shadow: var(--glass-shadow), var(--glass-inset); backdrop-filter: blur(10px); z-index: 1;}
+        .btn { position: relative; overflow: hidden; padding: 11px 20px; border-radius: 10px; border: 1px solid var(--glass-border); cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: var(--glass-shadow), var(--glass-inset); backdrop-filter: blur(10px); z-index: 1;}
         .btn i, .btn span { position: relative; z-index: 2; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(148,163,184,0.2), inset 0 2px 10px rgba(255,255,255,0.8); }
         .btn:active { transform: translateY(2px) scale(0.95); box-shadow: var(--glass-inset-active); }
@@ -205,9 +222,9 @@
         .icon-orange { background: rgba(249, 115, 22, 0.15); color: var(--soft-orange); }
         .icon-red { background: rgba(239, 68, 68, 0.15); color: var(--soft-red); }
         
-        .widget-info { position: relative; z-index: 2; }
+        .widget-info { position: relative; z-index: 2; overflow: hidden; }
         .widget-info h3 { font-size: 22px; font-weight: 700; color: var(--text-main); line-height: 1.2; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
-        .widget-info p { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-top: 2px;}
+        .widget-info p { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-top: 2px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 
         .filter-panel { border-radius: 16px; padding: 20px 32px; margin-bottom: 25px; display: none; gap: 20px; flex-wrap: wrap; }
         .filter-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
@@ -312,9 +329,114 @@
         .btn-kembali-dash:hover { background: rgba(255,255,255,1); box-shadow: 0 10px 25px rgba(148,163,184,0.3), inset 0 2px 10px rgba(255,255,255,1); transform: translateX(-50%) translateY(-2px); }
         .btn-kembali-dash:active { transform: translateX(-50%) translateY(2px) scale(0.95); box-shadow: inset 0 4px 10px rgba(148,163,184,0.1); }
 
+        /* =========================================
+           RESPONSIVE MEDIA QUERIES (MOBILE & TABLET)
+           ========================================= */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 5px 0 25px rgba(0,0,0,0.1);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .btn-mobile-menu {
+                display: block;
+            }
+            .global-summary {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            .appsheet-frame-content {
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                transform: scale(1);
+            }
+            .btn-kembali-dash {
+                top: 10px;
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-panel {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+                gap: 15px;
+            }
+            .action-bar {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-wrapper {
+                min-width: 100%;
+            }
+            .action-buttons {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            .action-buttons .btn {
+                flex: 1;
+                min-width: calc(50% - 6px);
+            }
+            .filter-panel {
+                padding: 20px;
+                gap: 15px;
+            }
+            .filter-group {
+                min-width: 100%;
+            }
+            .global-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+            .widget-info h3 {
+                font-size: 20px;
+            }
+            .content-card {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px 12px;
+            }
+            .page-title h1 {
+                font-size: 20px;
+            }
+            .global-summary {
+                grid-template-columns: 1fr; /* 1 Kolom untuk layar sangat kecil */
+                gap: 12px;
+            }
+            .widget-card {
+                padding: 16px;
+            }
+            .action-buttons .btn {
+                min-width: 100%;
+            }
+            .login-box {
+                padding: 30px 20px;
+                width: 95%;
+            }
+        }
+
         @media print {
             body { background: white !important; color: black !important; }
-            .sidebar, .action-bar, .filter-panel, .btn-masuk-sistem { display: none !important; }
+            .sidebar, .action-bar, .filter-panel, .btn-masuk-sistem, .btn-mobile-menu, .sidebar-overlay { display: none !important; }
             .main-content { margin-left: 0; padding: 0; }
             .header-panel, .glass-panel, .content-card, .widget-card { background: transparent !important; backdrop-filter: none !important; border: none; box-shadow: none !important; padding: 0; margin-bottom: 30px; }
             .page-title h1 { color: black !important; text-shadow: none !important; }
@@ -327,6 +449,9 @@
     </style>
 </head>
 <body>
+
+    <!-- OVERLAY SIDEBAR MOBILE -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <!-- MODAL LOGIN (Glass Light) -->
     <div id="loginOverlay" class="login-overlay">
@@ -400,9 +525,14 @@
         <div class="global-summary" id="globalSummaryContainer"></div>
 
         <div class="header-panel glass-panel">
-            <div class="page-title">
-                <h1 id="activeSheetTitle">HSE Report</h1>
-                <p>Data Tersinkronisasi Otomatis Dengan MSB ERP System</p>
+            <div class="page-title-wrapper">
+                <button class="btn-mobile-menu shine-effect" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1 id="activeSheetTitle">HSE Report</h1>
+                    <p>Data Tersinkronisasi Otomatis Dengan MSB ERP System</p>
+                </div>
             </div>
             
             <div class="action-bar">
@@ -488,6 +618,21 @@
 
         let globalData = [];
         let filterColumnMap = { dept: -1, jabatan: -1, nama: -1, mcu: -1 };
+
+        // ==========================================
+        // FUNGSI TOGGLE SIDEBAR MOBILE
+        // ==========================================
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
 
         // ==========================================
         // FUNGSI LOGIN & BUKA APPSHEET
@@ -957,6 +1102,16 @@
 
             filterTableData();
             setTimeout(() => calculateStickyLeftPositions(`view-${index}`), 50);
+
+            // Menutup otomatis sidebar di mobile ketika menu ditekan
+            if (window.innerWidth <= 992) {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            }
         }
 
         function calculateStickyLeftPositions(viewId) {
