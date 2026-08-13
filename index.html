@@ -7,6 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Tambahan Library untuk QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
     <style>
         :root {
             /* Tema Calm / Light Glass Variables */
@@ -90,9 +93,9 @@
         .gradient-border-hover::after {
             content: "";
             position: absolute;
-            inset: -2px; /* Melebihi ukuran elemen untuk menutupi border bawaan */
+            inset: -2px; 
             border-radius: inherit;
-            padding: 3px; /* Ketebalan gradasi border */
+            padding: 3px; 
             background: linear-gradient(60deg, #a1c4fd, #c2e9fb, #ff9a9e, #fecfef, #84fab0, #8fd3f4);
             background-size: 300% 300%;
             animation: gradientAnim 4s ease infinite alternate;
@@ -329,109 +332,73 @@
         .btn-kembali-dash:hover { background: rgba(255,255,255,1); box-shadow: 0 10px 25px rgba(148,163,184,0.3), inset 0 2px 10px rgba(255,255,255,1); transform: translateX(-50%) translateY(-2px); }
         .btn-kembali-dash:active { transform: translateX(-50%) translateY(2px) scale(0.95); box-shadow: inset 0 4px 10px rgba(148,163,184,0.1); }
 
+        /* BUTTON AKSI QR CODE */
+        .btn-action-qr {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn-action-qr:hover { background: rgba(59, 130, 246, 0.2); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(59,130,246,0.15); }
+
+        /* QR CODE MODAL KUSTOM */
+        .qr-modal-content {
+            margin: auto; display: block; width: 90%; max-width: 400px;
+            padding: 30px 20px; border-radius: 16px; text-align: center;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,1); box-shadow: 0 25px 50px rgba(148,163,184,0.3);
+            position: relative; animation: slideDown 0.4s ease;
+        }
+        .qr-container {
+            display: flex; justify-content: center; align-items: center; margin: 20px auto;
+            padding: 15px; background: #fff; border-radius: 12px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+            width: fit-content; border: 1px solid var(--glass-border);
+        }
+        .qr-actions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+
         /* =========================================
            RESPONSIVE MEDIA QUERIES (MOBILE & TABLET)
            ========================================= */
         @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 5px 0 25px rgba(0,0,0,0.1);
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .sidebar-overlay.active {
-                display: block;
-                opacity: 1;
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-            .btn-mobile-menu {
-                display: block;
-            }
-            .global-summary {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-            }
-            .appsheet-frame-content {
-                width: 100vw;
-                height: 100vh;
-                margin: 0;
-                border-radius: 0;
-                transform: scale(1);
-            }
-            .btn-kembali-dash {
-                top: 10px;
-                padding: 10px 20px;
-                font-size: 12px;
-            }
+            .sidebar { transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.1); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; opacity: 1; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .btn-mobile-menu { display: block; }
+            .global-summary { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+            .appsheet-frame-content { width: 100vw; height: 100vh; margin: 0; border-radius: 0; transform: scale(1); }
+            .btn-kembali-dash { top: 10px; padding: 10px 20px; font-size: 12px; }
         }
 
         @media (max-width: 768px) {
-            .header-panel {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 20px;
-                gap: 15px;
-            }
-            .action-bar {
-                width: 100%;
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .search-wrapper {
-                min-width: 100%;
-            }
-            .action-buttons {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-            .action-buttons .btn {
-                flex: 1;
-                min-width: calc(50% - 6px);
-            }
-            .filter-panel {
-                padding: 20px;
-                gap: 15px;
-            }
-            .filter-group {
-                min-width: 100%;
-            }
-            .global-summary {
-                grid-template-columns: 1fr 1fr;
-            }
-            .widget-info h3 {
-                font-size: 20px;
-            }
-            .content-card {
-                padding: 20px;
-            }
+            .header-panel { flex-direction: column; align-items: flex-start; padding: 20px; gap: 15px; }
+            .action-bar { width: 100%; flex-direction: column; align-items: stretch; }
+            .search-wrapper { min-width: 100%; }
+            .action-buttons { width: 100%; flex-wrap: wrap; }
+            .action-buttons .btn { flex: 1; min-width: calc(50% - 6px); }
+            .filter-panel { padding: 20px; gap: 15px; }
+            .filter-group { min-width: 100%; }
+            .global-summary { grid-template-columns: 1fr 1fr; }
+            .widget-info h3 { font-size: 20px; }
+            .content-card { padding: 20px; }
         }
 
         @media (max-width: 480px) {
-            .main-content {
-                padding: 15px 12px;
-            }
-            .page-title h1 {
-                font-size: 20px;
-            }
-            .global-summary {
-                grid-template-columns: 1fr; /* 1 Kolom untuk layar sangat kecil */
-                gap: 12px;
-            }
-            .widget-card {
-                padding: 16px;
-            }
-            .action-buttons .btn {
-                min-width: 100%;
-            }
-            .login-box {
-                padding: 30px 20px;
-                width: 95%;
-            }
+            .main-content { padding: 15px 12px; }
+            .page-title h1 { font-size: 20px; }
+            .global-summary { grid-template-columns: 1fr; gap: 12px; }
+            .widget-card { padding: 16px; }
+            .action-buttons .btn { min-width: 100%; }
+            .login-box { padding: 30px 20px; width: 95%; }
         }
 
         @media print {
@@ -445,6 +412,7 @@
             th { position: static !important; background: #e2e5e9 !important; color: black !important; box-shadow: inset 0 -1px 0 #000 !important; text-shadow: none !important; backdrop-filter: none !important; }
             td { background: transparent !important; color: black !important; position: static !important; box-shadow: none !important; border-bottom: 1px solid #ccc !important; }
             .sticky-col, th.sticky-col { background-color: transparent !important; color: black !important; box-shadow: none !important;}
+            .btn-action-qr { display: none !important; } /* Sembunyikan tombol QR saat print tabel biasa */
         }
     </style>
 </head>
@@ -494,6 +462,22 @@
             </button>
         </div>
         <iframe id="iframeAppSheet" class="appsheet-frame-content" src=""></iframe>
+    </div>
+
+    <!-- MODAL QR CODE -->
+    <div id="qrModal" class="photo-modal" onclick="closeQrModal(event)">
+        <div class="qr-modal-content">
+            <span class="close-modal" style="top: 15px; right: 20px;" onclick="closeQrModal(event)">&times;</span>
+            <h3 id="qrTitle" style="color: var(--text-main); font-weight: 700; margin-bottom: 5px;">Label Aset/Alat</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Pindai untuk melihat detail sistem.</p>
+            
+            <div id="qrCodeContainer" class="qr-container"></div>
+            
+            <div class="qr-actions">
+                <button class="btn btn-excel shine-effect" onclick="downloadQRCode()"><i class="fas fa-download"></i> Unduh QR</button>
+                <button class="btn btn-print shine-effect" onclick="printQRCode()"><i class="fas fa-print"></i> Print QR</button>
+            </div>
+        </div>
     </div>
 
     <div class="sidebar glass-panel">
@@ -555,6 +539,7 @@
             </div>
         </div>
 
+        <!-- FILTER UNTUK KARYAWAN -->
         <div class="filter-panel glass-panel" id="karyawanFilterPanel">
             <div class="filter-group">
                 <label>Departemen</label>
@@ -590,6 +575,26 @@
             </div>
         </div>
 
+        <!-- FILTER UNTUK CHECKLIST ALAT & MESIN -->
+        <div class="filter-panel glass-panel" id="checklistFilterPanel" style="display: none;">
+            <div class="filter-group">
+                <label>Jenis Alat</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterJenisAlat" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Jenis Alat</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Nama Alat</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterNamaAlat" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Nama Alat</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <div class="content-card glass-panel">
             <div class="loading-overlay" id="loadingOverlay">
                 <div class="spinner"></div>
@@ -615,9 +620,12 @@
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUHQnn4swXg-4h-YHKr6Z3rkjgYVGIl7WE0tkaTL7y8WYh2fKK_1oPISiiXf0rIbCR/exec"; 
         const APPSHEET_APP_NAME = "MSBHumanResource-310640119"; 
+        // ID Spreadsheet Eksternal untuk Data Alat
+        const DATA_ALAT_SHEET_ID = "1lGlWzWxQAv5mhzTlVpQCyIY1tUcr6XWDQh9QFPwz7-o";
 
         let globalData = [];
-        let filterColumnMap = { dept: -1, jabatan: -1, nama: -1, mcu: -1 };
+        let filterColumnMap = { dept: -1, jabatan: -1, nama: -1, mcu: -1, jenisAlat: -1, namaAlat: -1 };
+        let qrCodeInstance = null; // Menyimpan instance objek QR
 
         // ==========================================
         // FUNGSI TOGGLE SIDEBAR MOBILE
@@ -652,7 +660,6 @@
             
             try {
                 dropdown.innerHTML = '<option value="">-- Silakan Pilih User --</option>';
-                
                 const loginSheet = globalData.find(s => s.sheetName.toLowerCase() === "login");
                 
                 if (loginSheet && loginSheet.data.length > 1) {
@@ -678,9 +685,7 @@
                 alert("Harap pilih User dari dropdown terlebih dahulu untuk melanjutkan.");
                 return;
             }
-
             tutupLogin();
-            
             const urlAppSheet = "https://www.appsheet.com/start/594035d0-a21a-4650-8f10-82b3c864cbb9";
             document.getElementById('iframeAppSheet').src = urlAppSheet;
             document.getElementById('appsheetLayer').classList.add('active');
@@ -688,10 +693,7 @@
 
         function tutupAppSheet() {
             document.getElementById('appsheetLayer').classList.remove('active');
-            
-            setTimeout(() => {
-                document.getElementById('iframeAppSheet').src = "";
-            }, 600);
+            setTimeout(() => { document.getElementById('iframeAppSheet').src = ""; }, 600);
         }
 
         // ==========================================
@@ -707,13 +709,34 @@
             loading.style.display = 'flex';
 
             try {
+                // 1. Fetch data dari GAS Web App Utama
                 const response = await fetch(WEB_APP_URL);
-                if (!response.ok) throw new Error("Gagal memuat data");
+                if (!response.ok) throw new Error("Gagal memuat data dari Web App");
                 const data = await response.json();
                 
                 globalData = data;
-                renderGlobalSummary(data);
-                renderDashboard(data);
+
+                // 2. Fetch data paralel dari Google Sheet Data Alat (Client-Side)
+                try {
+                    const extUrl = `https://docs.google.com/spreadsheets/d/${DATA_ALAT_SHEET_ID}/gviz/tq?tqx=out:json&sheet=Data%20Alat`;
+                    const extRes = await fetch(extUrl);
+                    const extText = await extRes.text();
+                    
+                    // Parse respon JSON dari Google Visualization API
+                    const jsonString = extText.substring(47).slice(0, -2);
+                    const extJson = JSON.parse(jsonString);
+                    
+                    const headers = extJson.table.cols.map(c => c.label);
+                    const rows = extJson.table.rows.map(r => r.c.map(cell => cell && cell.v !== null ? cell.v.toString() : ""));
+                    
+                    // Append data alat secara dinamis sebagai Sheet Baru
+                    globalData.push({ sheetName: "Data Alat", data: [headers, ...rows] });
+                } catch(e) {
+                    console.error("Gagal sinkronisasi data dari Sheet Data Alat:", e);
+                }
+
+                renderGlobalSummary(globalData);
+                renderDashboard(globalData);
 
             } catch (error) {
                 console.error("Error:", error);
@@ -840,6 +863,8 @@
             if (name.includes("inspeksi") && name.includes("detail")) return 9;
             if (name.includes("sertifikat")) return 10;
             if (name.includes("apd") && name.includes("master")) return 11;
+            if (name.includes("checklist alat") || name.includes("mesin")) return 12;
+            if (name === "data alat") return 13; // Index untuk sheet Data Alat
             return 999;
         }
 
@@ -852,7 +877,7 @@
 
             let filteredSheets = sheetsData.filter(sheet => {
                 let name = sheet.sheetName.trim().toLowerCase();
-                return name !== "database" && name !== "login" && getIndex(name) <= 11;
+                return name !== "database" && name !== "login" && getIndex(name) <= 13; 
             });
 
             filteredSheets.sort((a, b) => {
@@ -867,11 +892,11 @@
             }
 
             let uniqueDept = new Set(), uniqueJabatan = new Set(), uniqueNama = new Set(), uniqueMcu = new Set();
+            let uniqueJenisAlat = new Set(), uniqueNamaAlat = new Set();
 
             filteredSheets.forEach((sheet, index) => {
                 let iconClass = "fa-table";
                 const cleanName = sheet.sheetName.trim().toLowerCase();
-                const isKaryawanTab = cleanName.includes("karyawan");
                 
                 if (cleanName.includes("lokasi")) iconClass = "fa-map-location-dot"; 
                 else if (cleanName.includes("kategori")) iconClass = "fa-layer-group"; 
@@ -884,12 +909,18 @@
                 else if (cleanName.includes("penyerahan")) iconClass = "fa-people-carry-box";
                 else if (cleanName.includes("cpa") || cleanName.includes("corrective")) iconClass = "fa-screwdriver-wrench"; 
                 else if (cleanName.includes("sertifikat")) iconClass = "fa-award";
+                else if (cleanName.includes("checklist alat") || cleanName.includes("mesin")) iconClass = "fa-toolbox";
+                else if (cleanName === "data alat") iconClass = "fa-wrench"; // Ikon untuk Data Alat
+
+                const isKaryawanTab = cleanName.includes("karyawan");
+                const isChecklistTab = cleanName.includes("checklist alat") || cleanName.includes("mesin");
+                const isQrCodeRequired = cleanName === "aset k3" || cleanName === "data alat";
 
                 const li = document.createElement('li');
                 li.className = `nav-item shine-effect gradient-border-hover`;
                 li.id = `nav-item-${index}`;
                 li.innerHTML = `<i class="fas ${iconClass}"></i> <span>${sheet.sheetName}</span>`;
-                li.onclick = () => switchTab(index, sheet.sheetName, isKaryawanTab);
+                li.onclick = () => switchTab(index, sheet.sheetName);
                 tabsContainer.appendChild(li);
 
                 const view = document.createElement('div');
@@ -906,6 +937,7 @@
                 let emptyColIndices = [];
                 let hiddenColIndices = [];
                 let namaLengkapIdx = -1, fotoIdx = -1, stokIdx = -1, bufferIdx = -1, kategoriApdIdx = -1;
+                let qrValueIndex = -1; // Index yang menyimpan ID Aset atau Kode Alat untuk QR
                 
                 let freezeLimitIndex = -1; 
 
@@ -935,7 +967,37 @@
                             if (h.includes("status mcu") || h.includes("mcu")) filterColumnMap.mcu = idx;
                             if (h.includes("foto") || h.includes("profile")) fotoIdx = idx;
                         }
+
+                        if (isChecklistTab) {
+                            if (h === "jenis alat" || h.includes("jenis")) filterColumnMap.jenisAlat = idx;
+                            if (h === "nama alat" || h.includes("nama alat")) filterColumnMap.namaAlat = idx;
+                        }
+
+                        // Penentuan indeks Target Data QR Code
+                        if (isQrCodeRequired) {
+                            if (cleanName === "aset k3" && (h === "id aset" || h.includes("id aset"))) qrValueIndex = idx;
+                            if (cleanName === "data alat" && (h === "kode alat" || h.includes("kode alat"))) qrValueIndex = idx;
+                        }
                     });
+
+                    // Sorting untuk checklist alat 
+                    if (isChecklistTab && filterColumnMap.jenisAlat !== -1 && filterColumnMap.namaAlat !== -1) {
+                        let headerRow = sheet.data[0];
+                        let dataRows = sheet.data.slice(1);
+                        
+                        dataRows.sort((a, b) => {
+                            let jenisA = (a[filterColumnMap.jenisAlat] || "").toString().toLowerCase();
+                            let jenisB = (b[filterColumnMap.jenisAlat] || "").toString().toLowerCase();
+                            if (jenisA < jenisB) return -1;
+                            if (jenisA > jenisB) return 1;
+                            let namaA = (a[filterColumnMap.namaAlat] || "").toString().toLowerCase();
+                            let namaB = (b[filterColumnMap.namaAlat] || "").toString().toLowerCase();
+                            if (namaA < namaB) return -1;
+                            if (namaA > namaB) return 1;
+                            return 0;
+                        });
+                        sheet.data = [headerRow, ...dataRows];
+                    }
 
                     let idIdx = headers.findIndex(h => h.includes("id ") || h === "id");
                     let jabatanIdx = headers.findIndex(h => h.includes("jabatan") || h.includes("position"));
@@ -957,11 +1019,13 @@
 
                 const trHead = document.createElement('tr');
 
+                // Pembuatan Kolom QR Code Header
+                let appendQrColumn = isQrCodeRequired && qrValueIndex !== -1;
+
                 sheet.data.forEach((row, rowIndex) => {
                     if (rowIndex === 0) {
                         row.forEach((cell, colIndex) => {
                             if (hiddenColIndices.includes(colIndex)) return; 
-                            
                             const th = document.createElement('th');
                             th.innerText = cell;
                             
@@ -969,9 +1033,16 @@
                                 th.classList.add('sticky-col');
                                 th.setAttribute('data-sticky-col', colIndex);
                             }
-                            
                             trHead.appendChild(th);
                         });
+                        
+                        if (appendQrColumn) {
+                            const thQr = document.createElement('th');
+                            thQr.innerText = "Aksi Sistem";
+                            thQr.style.textAlign = "center";
+                            trHead.appendChild(thQr);
+                        }
+
                         thead.appendChild(trHead);
                     } else {
                         if (isKaryawanTab && namaLengkapIdx !== -1) {
@@ -1009,6 +1080,11 @@
                                 if (colIndex === filterColumnMap.mcu) uniqueMcu.add(cellText);
                             }
 
+                            if (isChecklistTab && cellText !== "") {
+                                if (colIndex === filterColumnMap.jenisAlat) uniqueJenisAlat.add(cellText);
+                                if (colIndex === filterColumnMap.namaAlat) uniqueNamaAlat.add(cellText);
+                            }
+
                             td.setAttribute('data-col', colIndex);
                             td.setAttribute('data-col-val', cellText.toLowerCase());
 
@@ -1022,7 +1098,6 @@
                             } 
                             else if (isKaryawanTab && colIndex === fotoIdx && cellText !== "") {
                                 if (cellText.includes("/") || cellText.toLowerCase().endsWith(".jpg") || cellText.toLowerCase().endsWith(".png")) {
-                                    
                                     let appNameEncoded = encodeURIComponent(APPSHEET_APP_NAME);
                                     let tableNameEncoded = encodeURIComponent("Karyawan");
                                     let fileNameEncoded = encodeURIComponent(cellText);
@@ -1032,16 +1107,29 @@
                                     let fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(empName)}&background=e2e8f0&color=334155&size=50&rounded=false&bold=true`;
                                     
                                     td.innerHTML = `<img src="${imgSrc}" class="emp-photo gradient-border-hover" style="border-radius:6px;" alt="${empName}" onclick="openModal('${imgSrc}', '${empName}')" onerror="console.error('Gagal memuat gambar'); this.onerror=null; this.src='${fallbackUrl}';">`;
-                                    
                                 } else {
                                     td.innerText = cellText;
                                 }
                             } else {
                                 td.innerText = cellText;
                             }
-                            
                             tr.appendChild(td);
                         });
+
+                        // Pembuatan Kolom Button QR Row
+                        if (appendQrColumn) {
+                            const tdQr = document.createElement('td');
+                            tdQr.style.textAlign = "center";
+                            let cellTarget = row[qrValueIndex] ? row[qrValueIndex].toString().trim() : "";
+                            
+                            if(cellTarget !== "") {
+                                tdQr.innerHTML = `<button class="btn-action-qr shine-effect gradient-border-hover" onclick="showQrModal('${cellTarget}')">
+                                    <i class="fas fa-qrcode"></i> Generate QR
+                                </button>`;
+                            }
+                            tr.appendChild(tdQr);
+                        }
+
                         tbody.appendChild(tr);
                     }
                 });
@@ -1058,7 +1146,10 @@
             populateDropdown('filterNama', uniqueNama);
             populateDropdown('filterMcu', uniqueMcu);
 
-            switchTab(0, filteredSheets[0].sheetName, filteredSheets[0].sheetName.toLowerCase().includes("karyawan"));
+            populateDropdown('filterJenisAlat', uniqueJenisAlat);
+            populateDropdown('filterNamaAlat', uniqueNamaAlat);
+
+            switchTab(0, filteredSheets[0].sheetName);
         }
 
         function populateDropdown(elementId, uniqueSet) {
@@ -1074,18 +1165,28 @@
             });
         }
 
-        function switchTab(index, sheetName, isKaryawanTab) {
+        function switchTab(index, sheetName) {
+            const isKaryawanTab = sheetName.toLowerCase().includes("karyawan");
+            const isChecklistTab = sheetName.toLowerCase().includes("checklist alat") || sheetName.toLowerCase().includes("mesin");
+
             const titleEl = document.getElementById('activeSheetTitle');
             if (titleEl) titleEl.innerText = sheetName;
             
+            // Reset Semua Filter
             document.getElementById('tableSearch').value = '';
             document.getElementById('filterDept').value = '';
             document.getElementById('filterJabatan').value = '';
             document.getElementById('filterNama').value = '';
             document.getElementById('filterMcu').value = '';
+            
+            document.getElementById('filterJenisAlat').value = '';
+            document.getElementById('filterNamaAlat').value = '';
 
-            const filterPanel = document.getElementById('karyawanFilterPanel');
-            filterPanel.style.display = isKaryawanTab ? 'flex' : 'none';
+            const karyawanPanel = document.getElementById('karyawanFilterPanel');
+            const checklistPanel = document.getElementById('checklistFilterPanel');
+
+            karyawanPanel.style.display = isKaryawanTab ? 'flex' : 'none';
+            checklistPanel.style.display = isChecklistTab ? 'flex' : 'none';
 
             document.querySelectorAll('.nav-item').forEach((item, i) => {
                 if (i === index) item.classList.add('active');
@@ -1103,7 +1204,6 @@
             filterTableData();
             setTimeout(() => calculateStickyLeftPositions(`view-${index}`), 50);
 
-            // Menutup otomatis sidebar di mobile ketika menu ditekan
             if (window.innerWidth <= 992) {
                 const sidebar = document.querySelector('.sidebar');
                 const overlay = document.getElementById('sidebarOverlay');
@@ -1148,17 +1248,23 @@
             if (!activeView) return;
 
             const globalFilter = document.getElementById('tableSearch').value.toLowerCase().trim();
+            
             const fDept = document.getElementById('filterDept').value;
             const fJabatan = document.getElementById('filterJabatan').value;
             const fNama = document.getElementById('filterNama').value;
             const fMcu = document.getElementById('filterMcu').value;
+            
+            const fJenisAlat = document.getElementById('filterJenisAlat').value;
+            const fNamaAlat = document.getElementById('filterNamaAlat').value;
 
             const isKaryawanTab = document.getElementById('karyawanFilterPanel').style.display === 'flex';
+            const isChecklistTab = document.getElementById('checklistFilterPanel').style.display === 'flex';
 
             const rows = activeView.querySelectorAll('tbody tr');
             
             rows.forEach(row => {
                 let matchGlobal = true, matchDept = true, matchJab = true, matchNama = true, matchMcu = true;
+                let matchJenis = true, matchNamaAlat = true;
 
                 if (globalFilter !== "") matchGlobal = row.textContent.toLowerCase().includes(globalFilter);
 
@@ -1169,11 +1275,19 @@
                     if (fMcu !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.mcu}"]`); if (!td || td.getAttribute('data-col-val') !== fMcu) matchMcu = false; }
                 }
 
-                if (matchGlobal && matchDept && matchJab && matchNama && matchMcu) row.style.display = '';
+                if (isChecklistTab) {
+                    if (fJenisAlat !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.jenisAlat}"]`); if (!td || td.getAttribute('data-col-val') !== fJenisAlat) matchJenis = false; }
+                    if (fNamaAlat !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.namaAlat}"]`); if (!td || td.getAttribute('data-col-val') !== fNamaAlat) matchNamaAlat = false; }
+                }
+
+                if (matchGlobal && matchDept && matchJab && matchNama && matchMcu && matchJenis && matchNamaAlat) row.style.display = '';
                 else row.style.display = 'none';
             });
         }
 
+        // ==========================================
+        // FUNGSI MULTIMEDIA & MODAL
+        // ==========================================
         function openModal(imgSrc, captionText) {
             const modal = document.getElementById('photoModal');
             const modalImg = document.getElementById('modalImg');
@@ -1191,6 +1305,84 @@
                 modal.style.display = "none";
                 document.body.style.overflow = 'auto';
             }
+        }
+
+        // ==========================================
+        // FUNGSI MODAL & GENERATE QR CODE ALAT/ASET
+        // ==========================================
+        function showQrModal(qrValue) {
+            const modal = document.getElementById('qrModal');
+            const container = document.getElementById('qrCodeContainer');
+            const title = document.getElementById('qrTitle');
+
+            title.innerText = qrValue; // Set ID/Kode sbg judul label
+            container.innerHTML = ""; // Bersihkan QR lama
+
+            qrCodeInstance = new QRCode(container, {
+                text: qrValue,
+                width: 220,
+                height: 220,
+                colorDark : "#334155", // Senada dengan tema modern kalem
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            modal.style.display = "block";
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeQrModal(event) {
+            const modal = document.getElementById('qrModal');
+            if (!event || event.target.className === 'close-modal' || event.target.className === 'photo-modal') {
+                modal.style.display = "none";
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function downloadQRCode() {
+            const qrCanvas = document.querySelector("#qrCodeContainer canvas");
+            if (!qrCanvas) { alert("QR Code belum ter-generate."); return; }
+            
+            const dataUrl = qrCanvas.toDataURL("image/png");
+            const title = document.getElementById('qrTitle').innerText;
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = `QR_Code_${title}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function printQRCode() {
+            const qrCanvas = document.querySelector("#qrCodeContainer canvas");
+            if (!qrCanvas) { alert("QR Code belum ter-generate."); return; }
+
+            const dataUrl = qrCanvas.toDataURL("image/png");
+            const title = document.getElementById('qrTitle').innerText;
+            
+            const printWin = window.open('', '_blank');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>Print Label QR - ${title}</title>
+                    <style>
+                        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff;}
+                        .label-card { border: 2px dashed #000; padding: 30px; text-align: center; border-radius: 12px;}
+                        img { max-width: 250px; display: block; margin: 0 auto;}
+                        h2 { margin-top: 20px; font-size: 26px; color: #000; letter-spacing: 1px; margin-bottom: 5px;}
+                        p { font-size: 14px; font-weight: bold; color: #555; text-transform: uppercase;}
+                    </style>
+                </head>
+                <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+                    <div class="label-card">
+                        <img src="${dataUrl}" alt="QR Code ${title}"/>
+                        <h2>${title}</h2>
+                        <p>PT Murinda Sentra Baja</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
         }
 
         function exportToExcel() {
