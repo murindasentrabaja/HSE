@@ -1,792 +1,1576 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>HSE ERP — Sistem Manajemen HSE Terintegrasi</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-  :root{
-    --brand:#1e40af; --brand-2:#2563eb; --safety:#10b981; --safety-dark:#059669;
-    --danger:#dc2626; --warn:#f59e0b; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
-    --bg:#f8fafc; --card:#ffffff;
-  }
-  *{font-family:'Plus Jakarta Sans',sans-serif;}
-  body{background:var(--bg);color:var(--ink);}
-  .brand-grad{background:linear-gradient(135deg,#1e40af 0%,#2563eb 55%,#10b981 130%);}
-  .side-item{transition:all .15s ease}
-  .side-item:hover{background:#eff6ff;color:var(--brand)}
-  .side-item.active{background:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(30,64,175,.25)}
-  .kpi-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;transition:transform .2s}
-  .kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,23,42,.06)}
-  .badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:11px;font-weight:600}
-  .b-green{background:#dcfce7;color:#166534}
-  .b-red{background:#fee2e2;color:#991b1b}
-  .b-yellow{background:#fef3c7;color:#92400e}
-  .b-blue{background:#dbeafe;color:#1e40af}
-  .b-gray{background:#f1f5f9;color:#475569}
-  table.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
-  table.data-table thead th{background:#f1f5f9;text-align:left;padding:10px 12px;font-weight:600;color:#334155;border-bottom:2px solid var(--line);position:sticky;top:0;z-index:10}
-  table.data-table tbody td{padding:10px 12px;border-bottom:1px solid #f1f5f9;color:#334155;white-space:nowrap}
-  table.data-table tbody tr:hover{background:#f8fafc}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-weight:600;font-size:13px;transition:all .15s;cursor:pointer;border:none}
-  .btn-primary{background:var(--brand);color:#fff}
-  .btn-primary:hover{background:#1e3a8a}
-  .btn-safety{background:var(--safety);color:#fff}
-  .btn-safety:hover{background:var(--safety-dark)}
-  .btn-ghost{background:#fff;color:#334155;border:1px solid var(--line)}
-  .btn-ghost:hover{background:#f1f5f9}
-  .btn-danger{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-  .btn-danger:hover{background:#fee2e2}
-  .input,.select,.textarea{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:9px;font-size:13px;background:#fff;color:var(--ink);outline:none;transition:border-color .15s}
-  .input:focus,.select:focus,.textarea:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-  .label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px}
-  .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
-  .modal-backdrop.open{display:flex}
-  .modal{background:#fff;border-radius:16px;max-width:900px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;animation:pop .2s ease}
-  @keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
-  .toast{position:fixed;top:20px;right:20px;padding:14px 18px;border-radius:10px;color:#fff;font-weight:600;font-size:13px;z-index:100;box-shadow:0 10px 30px rgba(0,0,0,.15);animation:slideIn .25s ease}
-  @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-  .grain{position:relative}
-  .grain::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.08) 1px,transparent 1px),radial-gradient(circle at 70% 60%,rgba(255,255,255,.05) 1px,transparent 1px);background-size:32px 32px;pointer-events:none}
-  .scroll-thin::-webkit-scrollbar{width:8px;height:8px}
-  .scroll-thin::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
-  .risk-Rendah{background:#dcfce7;color:#166534}
-  .risk-Sedang{background:#fef3c7;color:#92400e}
-  .risk-Tinggi{background:#fed7aa;color:#9a3412}
-  .risk-Sangat.Tinggi,.risk-SangatTinggi{background:#fee2e2;color:#991b1b}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health, Safety, and Environment (HSE) - PT Murinda Sentra Baja</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Tambahan Library untuk QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            /* Tema Calm / Light Glass Variables */
+            --bg-gradient: linear-gradient(-45deg, #f1f5f9, #e2e8f0, #f8fafc, #cbd5e1);
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-bg-hover: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-border-light: rgba(255, 255, 255, 1);
+            --glass-shadow: 0 8px 32px 0 rgba(148, 163, 184, 0.15);
+            --glass-inset: inset 0 2px 4px 0 rgba(255, 255, 255, 0.9);
+            --glass-inset-active: inset 0 4px 8px 0 rgba(148, 163, 184, 0.2);
+            
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --sidebar-width: 290px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Warna Aksen Kalem / Soft */
+            --soft-green: #059669;
+            --soft-yellow: #d97706;
+            --soft-blue: #2563eb;
+            --soft-purple: #7c3aed;
+            --soft-orange: #ea580c;
+            --soft-red: #dc2626;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+        
+        body { 
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-main); 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Kustomisasi Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.02); }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+
+        /* KELAS GLASS UMUM */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* EFEK PANTULAN CAHAYA 3D UMUM (HOVER) */
+        .shine-effect::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.8), transparent);
+            transform: skewX(-25deg);
+            transition: all 0.6s ease;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .shine-effect:hover::before {
+            left: 150%;
+        }
+
+        /* GRADASI ANIMASI MENGELILINGI BORDER (HOVER & FOCUS) */
+        .gradient-border-hover {
+            position: relative;
+        }
+        .gradient-border-hover::after {
+            content: "";
+            position: absolute;
+            inset: -2px; 
+            border-radius: inherit;
+            padding: 3px; 
+            background: linear-gradient(60deg, #a1c4fd, #c2e9fb, #ff9a9e, #fecfef, #84fab0, #8fd3f4);
+            background-size: 300% 300%;
+            animation: gradientAnim 4s ease infinite alternate;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .gradient-border-hover:hover::after,
+        .gradient-border-hover:focus-within::after {
+            opacity: 1;
+        }
+
+        @keyframes gradientAnim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* OVERLAY SIDEBAR MOBILE */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* SIDEBAR */
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100%; display: flex; flex-direction: column; z-index: 100; border-right: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(20px);}
+        .sidebar-brand { padding: 30px 24px; border-bottom: 1px solid var(--glass-border); position: relative; text-align: center;}
+        .sidebar-brand::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(148,163,184,0.3), transparent); }
+        .sidebar-brand img { width: 130px; margin: 0 auto 18px auto; display: block; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); }
+        .sidebar-brand h2 { font-size: 21px; font-weight: 700; color: var(--text-main); letter-spacing: 1px; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+        .sidebar-brand p { font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-top: 4px; letter-spacing: 1.2px; }
+        
+        /* TOMBOL MASUK SISTEM APPSHEET */
+        .btn-masuk-sistem {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14.5px;
+            cursor: pointer;
+            width: calc(100% - 28px);
+            margin: 20px 14px 5px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: var(--glass-shadow), var(--glass-inset);
+            backdrop-filter: blur(10px);
+        }
+        .btn-masuk-sistem:hover { 
+            background: rgba(255, 255, 255, 1); 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 25px rgba(148,163,184,0.2), inset 0 2px 10px rgba(255,255,255,0.8);
+        }
+        .btn-masuk-sistem:active {
+            transform: translateY(2px) scale(0.97);
+            box-shadow: var(--glass-inset-active);
+        }
+        
+        /* TOMBOL CHECKLIST BARU */
+        .btn-checklist {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14.5px;
+            cursor: pointer;
+            width: calc(100% - 28px);
+            margin: 10px 14px 5px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+            backdrop-filter: blur(10px);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .btn-checklist:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+        .btn-checklist:active {
+            transform: translateY(2px) scale(0.97);
+        }
+
+        .sidebar-menu-wrapper { padding: 10px 14px; flex-grow: 1; overflow-y: auto; }
+        .menu-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; padding-left: 12px; margin-bottom: 12px; margin-top: 20px; }
+        .sidebar-menu { list-style: none; }
+        .nav-item { position: relative; overflow: hidden; padding: 14px 18px; cursor: pointer; font-weight: 500; color: var(--text-muted); border-radius: 12px; margin-bottom: 8px; transition: var(--transition); display: flex; align-items: center; gap: 12px; font-size: 14.5px; border: 1px solid transparent; }
+        .nav-item i { font-size: 16px; width: 20px; text-align: center; position: relative; z-index: 2; }
+        .nav-item span { position: relative; z-index: 2; }
+        .nav-item:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.5); box-shadow: var(--glass-inset); }
+        .nav-item.active { background: rgba(255,255,255,0.9); color: var(--soft-blue); font-weight: 700; box-shadow: var(--glass-shadow), inset 0 0 15px rgba(255,255,255,0.8); border-color: var(--glass-border-light); }
+        .nav-item:active { transform: scale(0.96); box-shadow: var(--glass-inset-active); }
+        .sidebar-footer { padding: 20px; border-top: 1px solid var(--glass-border); background: rgba(255,255,255,0.3); font-size: 11px; color: var(--text-muted); line-height: 1.5; text-align: center; font-weight: 500; }
+        .sidebar-footer strong { color: var(--text-main); font-weight: 700; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; padding: 30px 40px; transition: var(--transition); }
+        .header-panel { border-radius: 16px; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 20px; }
+        
+        .page-title-wrapper { display: flex; align-items: center; gap: 15px; }
+        .btn-mobile-menu { display: none; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 18px; box-shadow: var(--glass-shadow); transition: var(--transition); }
+        .btn-mobile-menu:active { transform: scale(0.95); }
+
+        .page-title h1 { font-size: 24px; font-weight: 700; color: var(--text-main); text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+        .page-title p { color: var(--text-muted); font-size: 13px; margin-top: 3px; font-weight: 500; }
+        .action-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        
+        .search-wrapper { position: relative; min-width: 280px; }
+        .search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; z-index: 2;}
+        .search-input { width: 100%; padding: 11px 16px 11px 42px; border-radius: 10px; border: 1px solid var(--glass-border); font-size: 13.5px; background-color: rgba(255, 255, 255, 0.6); color: var(--text-main); outline: none; transition: var(--transition); box-shadow: inset 0 2px 5px rgba(148,163,184,0.1); backdrop-filter: blur(5px); }
+        .search-input::placeholder { color: #94a3b8; font-weight: 400; }
+        .search-input:focus { background-color: rgba(255, 255, 255, 0.9); box-shadow: inset 0 2px 5px rgba(148,163,184,0.1), 0 0 15px rgba(255,255,255,0.5); }
+        
+        .action-buttons { display: flex; gap: 12px; }
+        .btn { position: relative; overflow: hidden; padding: 11px 20px; border-radius: 10px; border: 1px solid var(--glass-border); cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition); box-shadow: var(--glass-shadow), var(--glass-inset); backdrop-filter: blur(10px); z-index: 1;}
+        .btn i, .btn span { position: relative; z-index: 2; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(148,163,184,0.2), inset 0 2px 10px rgba(255,255,255,0.8); }
+        .btn:active { transform: translateY(2px) scale(0.95); box-shadow: var(--glass-inset-active); }
+        
+        .btn-refresh { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #1d4ed8; }
+        .btn-refresh:hover { background: rgba(59, 130, 246, 0.2); }
+        .btn-excel { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #047857; }
+        .btn-excel:hover { background: rgba(16, 185, 129, 0.2); }
+        .btn-print { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); color: #334155; }
+        .btn-print:hover { background: rgba(100, 116, 139, 0.2); }
+
+        /* WIDGETS & FILTERS */
+        .global-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .widget-card { border-radius: 14px; padding: 20px; display: flex; align-items: center; gap: 16px; transition: var(--transition); cursor: pointer; background: rgba(255,255,255,0.6); }
+        .widget-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(148,163,184,0.2), inset 0 2px 15px rgba(255,255,255,0.8); }
+        .widget-card:active { transform: translateY(1px) scale(0.97); box-shadow: var(--glass-inset-active); }
+        
+        .widget-icon { width: 48px; height: 48px; min-width: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: inset 0 2px 5px rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.9); position: relative; z-index: 2;}
+        .icon-green { background: rgba(16, 185, 129, 0.15); color: var(--soft-green); }
+        .icon-yellow { background: rgba(245, 158, 11, 0.15); color: var(--soft-yellow); }
+        .icon-blue { background: rgba(59, 130, 246, 0.15); color: var(--soft-blue); }
+        .icon-purple { background: rgba(139, 92, 246, 0.15); color: var(--soft-purple); }
+        .icon-orange { background: rgba(249, 115, 22, 0.15); color: var(--soft-orange); }
+        .icon-red { background: rgba(239, 68, 68, 0.15); color: var(--soft-red); }
+        
+        .widget-info { position: relative; z-index: 2; overflow: hidden; }
+        .widget-info h3 { font-size: 22px; font-weight: 700; color: var(--text-main); line-height: 1.2; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+        .widget-info p { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-top: 2px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+
+        .filter-panel { border-radius: 16px; padding: 20px 32px; margin-bottom: 25px; display: none; gap: 20px; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+        .filter-group label { font-size: 12.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(255,255,255,0.8); }
+        
+        /* Glass Input/Select */
+        .filter-select { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--glass-border); outline: none; background: rgba(255, 255, 255, 0.6); color: var(--text-main); font-family: inherit; font-size: 13.5px; cursor: pointer; transition: var(--transition); appearance: none; box-shadow: inset 0 2px 5px rgba(148,163,184,0.1); backdrop-filter: blur(5px);
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%22%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); 
+            background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto; 
+        }
+        .filter-select option { background: #ffffff; color: var(--text-main); }
+        .filter-select:focus { background-color: rgba(255,255,255,0.9); box-shadow: inset 0 2px 5px rgba(148,163,184,0.1), 0 0 15px rgba(255,255,255,0.5); }
+
+        /* TABLE */
+        .content-card { border-radius: 16px; padding: 32px; position: relative; min-height: 480px; }
+        .table-responsive { overflow-x: auto; overflow-y: auto; max-height: 620px; border-radius: 12px; border: 1px solid var(--glass-border); position: relative; padding-bottom: 20px; background: rgba(255,255,255,0.4); box-shadow: inset 0 0 20px rgba(148,163,184,0.05); }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+        
+        th { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); color: var(--text-main); font-weight: 700; padding: 16px 20px; white-space: nowrap; font-size: 14px; top: 0; position: sticky; z-index: 10; box-shadow: inset 0 -1px 0 rgba(148,163,184,0.2); text-shadow: 0 1px 2px rgba(255,255,255,0.9); }
+        td { padding: 14px 20px; border-bottom: 1px solid rgba(148,163,184,0.15); color: var(--text-main); font-size: 14px; transition: var(--transition); background-color: transparent; vertical-align: middle; white-space: nowrap; font-weight: 500;}
+        
+        /* Glassy Table Hover */
+        tbody tr { transition: all 0.2s ease; }
+        tbody tr:hover td { background-color: rgba(255, 255, 255, 0.6); }
+        tbody tr td:hover { background: rgba(255, 255, 255, 0.95) !important; font-weight: 600; text-shadow: 0 1px 2px rgba(255,255,255,0.9); }
+        
+        /* Sticky Columns Handling untuk Light Glass Theme */
+        .sticky-col { position: sticky; z-index: 5 !important; background-color: rgba(248, 250, 252, 0.95) !important; box-shadow: inset -1px 0 0 rgba(148,163,184,0.2) !important; }
+        th.sticky-col { z-index: 15 !important; background-color: rgba(241, 245, 249, 0.95) !important; box-shadow: inset -1px -1px 0 rgba(148,163,184,0.2) !important; }
+        tbody tr:hover td.sticky-col { background-color: rgba(255, 255, 255, 0.95) !important; }
+
+        /* PERBAIKAN STICKY KOLOM AKSI SISTEM DI KANAN AGAR SELALU TERLIHAT */
+        .sticky-action-col { 
+            position: sticky !important; 
+            right: 0; 
+            z-index: 12 !important; 
+            background-color: rgba(248, 250, 252, 0.95) !important; 
+            box-shadow: inset 1px 0 0 rgba(148,163,184,0.2) !important; 
+        }
+        th.sticky-action-col { 
+            z-index: 16 !important; 
+            background-color: rgba(241, 245, 249, 0.95) !important; 
+        }
+        tbody tr:hover td.sticky-action-col { 
+            background-color: rgba(255, 255, 255, 0.95) !important; 
+        }
+        
+        .emp-photo { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid var(--glass-border); box-shadow: 0 4px 10px rgba(148,163,184,0.2); background-color: rgba(241,245,249,0.5); display: block; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; cursor: pointer; }
+        .emp-photo:hover { transform: scale(1.15) rotate(2deg); box-shadow: 0 8px 20px rgba(148,163,184,0.3), 0 0 15px rgba(255,255,255,0.8); border-color: #fff;}
+        
+        /* MULTIMEDIA MODALS */
+        .photo-modal { display: none; position: fixed; z-index: 9999; padding-top: 60px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(255,255,255,0.5); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); animation: fadeInModal 0.4s ease; }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { margin: auto; display: block; max-width: 90%; max-height: 80vh; border-radius: 12px; box-shadow: 0 20px 50px rgba(148,163,184,0.3), 0 0 30px rgba(255,255,255,0.8); object-fit: contain; border: 1px solid rgba(255,255,255,0.8); background: #fff;}
+        .close-modal { position: absolute; top: 25px; right: 40px; color: var(--text-main); font-size: 40px; font-weight: bold; transition: 0.3s; cursor: pointer; text-shadow: 0 1px 3px rgba(255,255,255,0.9); }
+        .close-modal:hover { color: #000; transform: scale(1.1); text-shadow: 0 0 15px #fff; }
+        #modalCaption { margin: auto; display: block; width: 80%; max-width: 700px; text-align: center; color: var(--text-main); padding: 15px 0; font-size: 18px; font-weight: 700; letter-spacing: 1px; text-shadow: 0 1px 2px rgba(255,255,255,0.9); }
+
+        .warning-row td { background-color: rgba(239, 68, 68, 0.1) !important; color: #b91c1c !important; }
+        .warning-row:hover td { background-color: rgba(239, 68, 68, 0.2) !important; color: #991b1b !important; }
+
+        /* LOADING OVERLAY */
+        .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 90; border-radius: 16px; display: none; border: 1px solid var(--glass-border); }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(148, 163, 184, 0.2); border-top-color: var(--soft-blue); border-radius: 50%; animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 18px; font-weight: 600; color: var(--text-main); text-shadow: 0 1px 2px rgba(255,255,255,0.8); font-size: 14px; letter-spacing: 1px; }
+        
+        .sheet-view { display: none; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sheet-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* LOGIN MODAL */
+        .login-overlay { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); animation: fadeInModal 0.4s ease; }
+        .login-box { margin: 8vh auto; padding: 40px; width: 90%; max-width: 400px; background: rgba(255,255,255,0.85); border-radius: 20px; text-align: center; position: relative; animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 20px 50px rgba(148,163,184,0.3); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-50px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .login-box .close-btn { position: absolute; top: 20px; right: 25px; font-size: 26px; cursor: pointer; color: var(--text-muted); transition: 0.3s; text-shadow: 0 1px 2px rgba(255,255,255,0.8); z-index: 10;}
+        .login-box .close-btn:hover { color: var(--text-main); transform: scale(1.2) rotate(90deg); text-shadow: 0 0 10px #fff; }
+        
+        .login-logo-wrapper {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 25px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(148,163,184,0.2), inset 0 2px 10px rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 1);
+        }
+        .msb-logo-login { width: 100px; object-fit: contain; position: relative; z-index: 2; margin-bottom: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));}
+
+        .login-box h2 { margin-bottom: 25px; color: var(--text-main); font-weight: 700; font-size: 22px; text-shadow: 0 1px 2px rgba(255,255,255,0.9); position: relative; z-index: 2;}
+        .input-group { margin-bottom: 20px; text-align: left; position: relative; z-index: 2;}
+        .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(255,255,255,0.9);}
+        
+        .form-control { width: 100%; padding: 14px 16px; border: 1px solid var(--glass-border); border-radius: 12px; outline: none; background: rgba(255, 255, 255, 0.7); transition: var(--transition); font-size: 14.5px; color: var(--text-main); font-family: inherit; box-shadow: inset 0 2px 5px rgba(148,163,184,0.1); backdrop-filter: blur(5px);}
+        .form-control::placeholder { color: #94a3b8; }
+        .form-control:focus { background: rgba(255, 255, 255, 0.95); box-shadow: inset 0 2px 5px rgba(148,163,184,0.1), 0 0 15px rgba(255,255,255,0.5); }
+        
+        /* FRAME APPSHEET LAYER */
+        .appsheet-layer {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 10001; transform: translateX(100%); opacity: 0; 
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+        }
+        .appsheet-layer.active { transform: translateX(0); opacity: 1; }
+        .appsheet-frame-content { width: 100%; height: 100%; border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 0 40px rgba(148,163,184,0.4); transform: scale(0.98); margin-top: 1vh; height: 98vh; width: 98vw; margin-left: 1vw;}
+        .btn-kembali-dash {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.85); color: var(--text-main); font-weight: 700; font-size: 13px;
+            padding: 12px 28px; border-radius: 30px; cursor: pointer; z-index: 10002;
+            box-shadow: 0 8px 20px rgba(148,163,184,0.2), inset 0 2px 5px rgba(255,255,255,0.9); display: flex; align-items: center; gap: 8px; 
+            transition: var(--transition); border: 1px solid rgba(255,255,255,1); backdrop-filter: blur(10px);
+        }
+        .btn-kembali-dash:hover { background: rgba(255,255,255,1); box-shadow: 0 10px 25px rgba(148,163,184,0.3), inset 0 2px 10px rgba(255,255,255,1); transform: translateX(-50%) translateY(-2px); }
+        .btn-kembali-dash:active { transform: translateX(-50%) translateY(2px) scale(0.95); box-shadow: inset 0 4px 10px rgba(148,163,184,0.1); }
+
+        /* PERBAIKAN BUTTON AKSI QR CODE AGAR MENCOLOK */
+        .btn-action-qr {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+        .btn-action-qr:hover { 
+            background: linear-gradient(135deg, #059669, #047857); 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4); 
+            color: #ffffff;
+        }
+
+        /* QR CODE MODAL KUSTOM */
+        .qr-modal-content {
+            margin: auto; display: block; width: 90%; max-width: 420px;
+            padding: 30px 25px; border-radius: 16px; text-align: center;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,1); box-shadow: 0 25px 50px rgba(148,163,184,0.3);
+            position: relative; animation: slideDown 0.4s ease;
+        }
+        .qr-container {
+            display: flex; justify-content: center; align-items: center; margin: 20px auto;
+            padding: 15px; background: #fff; border-radius: 12px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+            width: fit-content; border: 1px solid var(--glass-border);
+        }
+        .qr-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+
+        /* =========================================
+           RESPONSIVE MEDIA QUERIES (MOBILE & TABLET)
+           ========================================= */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 25px rgba(0,0,0,0.1); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; opacity: 1; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .btn-mobile-menu { display: block; }
+            .global-summary { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+            .appsheet-frame-content { width: 100vw; height: 100vh; margin: 0; border-radius: 0; transform: scale(1); }
+            .btn-kembali-dash { top: 10px; padding: 10px 20px; font-size: 12px; }
+        }
+
+        @media (max-width: 768px) {
+            .header-panel { flex-direction: column; align-items: flex-start; padding: 20px; gap: 15px; }
+            .action-bar { width: 100%; flex-direction: column; align-items: stretch; }
+            .search-wrapper { min-width: 100%; }
+            .action-buttons { width: 100%; flex-wrap: wrap; }
+            .action-buttons .btn { flex: 1; min-width: calc(50% - 6px); }
+            .filter-panel { padding: 20px; gap: 15px; }
+            .filter-group { min-width: 100%; }
+            .global-summary { grid-template-columns: 1fr 1fr; }
+            .widget-info h3 { font-size: 20px; }
+            .content-card { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .main-content { padding: 15px 12px; }
+            .page-title h1 { font-size: 20px; }
+            .global-summary { grid-template-columns: 1fr; gap: 12px; }
+            .widget-card { padding: 16px; }
+            .action-buttons .btn { min-width: 100%; }
+            .login-box { padding: 30px 20px; width: 95%; }
+        }
+
+        @media print {
+            body { background: white !important; color: black !important; }
+            .sidebar, .action-bar, .filter-panel, .btn-masuk-sistem, .btn-checklist, .btn-mobile-menu, .sidebar-overlay { display: none !important; }
+            .main-content { margin-left: 0; padding: 0; }
+            .header-panel, .glass-panel, .content-card, .widget-card { background: transparent !important; backdrop-filter: none !important; border: none; box-shadow: none !important; padding: 0; margin-bottom: 30px; }
+            .page-title h1 { color: black !important; text-shadow: none !important; }
+            .sheet-view { display: block !important; page-break-after: always; margin-bottom: 40px; }
+            .table-responsive { max-height: none; overflow: visible; border: none; background: transparent !important; box-shadow: none !important; }
+            th { position: static !important; background: #e2e5e9 !important; color: black !important; box-shadow: inset 0 -1px 0 #000 !important; text-shadow: none !important; backdrop-filter: none !important; }
+            td { background: transparent !important; color: black !important; position: static !important; box-shadow: none !important; border-bottom: 1px solid #ccc !important; }
+            .sticky-col, th.sticky-col, .sticky-action-col, th.sticky-action-col { background-color: transparent !important; color: black !important; box-shadow: none !important;}
+            .btn-action-qr { display: none !important; } /* Sembunyikan tombol QR saat print tabel biasa */
+        }
+    </style>
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
-<div id="loginView" class="min-h-screen flex items-center justify-center p-6 brand-grad grain">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-12 h-12 rounded-xl brand-grad flex items-center justify-center text-white text-xl"><i class="fa-solid fa-helmet-safety"></i></div>
-      <div>
-        <h1 class="text-xl font-extrabold text-slate-900">HSE ERP</h1>
-        <p class="text-xs text-slate-500">Sistem Manajemen K3 Terintegrasi</p>
-      </div>
-    </div>
-    <h2 class="text-2xl font-bold text-slate-900 mb-1">Masuk ke Sistem</h2>
-    <p class="text-sm text-slate-500 mb-6">Gunakan akun yang terdaftar di sheet Users</p>
-    <form id="loginForm" class="space-y-4">
-      <div>
-        <label class="label">Username</label>
-        <input class="input" id="lgUser" placeholder="admin" required data-testid="login-username" />
-      </div>
-      <div>
-        <label class="label">Password</label>
-        <input type="password" class="input" id="lgPass" placeholder="••••••••" required data-testid="login-password" />
-      </div>
-      <div id="lgErr" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3"></div>
-      <button type="submit" class="btn btn-primary w-full justify-center" data-testid="login-submit">
-        <i class="fa-solid fa-right-to-bracket"></i> Masuk
-      </button>
-    </form>
-    <div class="mt-5 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg p-3">
-      <strong>Default:</strong> admin / admin123 <br>
-      Jika belum bisa login, buka Apps Script → jalankan <code class="bg-white px-1 rounded">initAll()</code>
-    </div>
-  </div>
-</div>
+    <!-- OVERLAY SIDEBAR MOBILE -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- ===== APP SHELL ===== -->
-<div id="appView" class="hidden min-h-screen flex">
-  <!-- Sidebar -->
-  <aside class="w-64 bg-white border-r border-slate-200 flex flex-col h-screen sticky top-0">
-    <div class="p-5 border-b border-slate-200 flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg brand-grad flex items-center justify-center text-white"><i class="fa-solid fa-helmet-safety"></i></div>
-      <div>
-        <div class="font-extrabold text-slate-900 text-sm">HSE ERP</div>
-        <div class="text-[10px] text-slate-500 uppercase tracking-widest">Realtime Sheet</div>
-      </div>
-    </div>
-    <nav id="sidebar" class="flex-1 overflow-y-auto scroll-thin p-3 space-y-1 text-sm"></nav>
-    <div class="p-3 border-t border-slate-200">
-      <div class="flex items-center gap-3 mb-3 px-2">
-        <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold" id="userAvatar">A</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-sm font-semibold text-slate-900 truncate" id="userName">-</div>
-          <div class="text-[11px] text-slate-500 truncate" id="userRole">-</div>
+    <!-- MODAL LOGIN (Glass Light) -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box glass-panel">
+            <span class="close-btn" onclick="tutupLogin()">&times;</span>
+            <div class="login-logo-wrapper">
+                <img src="MSB Logo.png" alt="MSB Logo" class="msb-logo-login" onerror="this.onerror=null; this.src='https://via.placeholder.com/140x60/f1f5f9/334155?text=MSB+Logo'">
+            </div>
+            <h2>Login Sistem HSE</h2>
+            
+            <div class="input-group">
+                <label>Pilih User Anda</label>
+                <div class="gradient-border-hover" style="border-radius: 12px;">
+                    <select id="dropdownUser" class="form-control">
+                        <option value="">-- Sedang Memuat Data User --</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Password / PIN (Opsional)</label>
+                <div class="gradient-border-hover" style="border-radius: 12px;">
+                    <input type="password" id="inputPassword" class="form-control" placeholder="Masukkan sandi jika ada">
+                </div>
+            </div>
+            
+            <div class="gradient-border-hover" style="border-radius: 12px; margin-top: 25px;">
+                <button class="btn btn-masuk-sistem shine-effect" style="margin: 0; width: 100%;" onclick="prosesLoginAppSheet()">
+                    <i class="fas fa-sign-in-alt"></i> <span>Login MSB HSE System</span>
+                </button>
+            </div>
         </div>
-      </div>
-      <button class="btn btn-ghost w-full justify-center" onclick="logout()" data-testid="logout-btn">
-        <i class="fa-solid fa-right-from-bracket"></i> Keluar
-      </button>
     </div>
-  </aside>
 
-  <!-- Main -->
-  <main class="flex-1 flex flex-col min-w-0">
-    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-30">
-      <div>
-        <h1 class="text-lg font-bold text-slate-900" id="pageTitle">Dashboard</h1>
-        <p class="text-xs text-slate-500" id="pageSub">Ringkasan indikator kinerja HSE</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="btn btn-ghost" onclick="refreshCurrent()" data-testid="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
-        <button class="btn btn-ghost hidden" id="exportXlsxBtn" onclick="exportXlsx()"><i class="fa-solid fa-file-excel text-emerald-600"></i> Excel</button>
-        <button class="btn btn-ghost hidden" id="exportPdfBtn" onclick="exportPdf()"><i class="fa-solid fa-file-pdf text-red-600"></i> PDF</button>
-        <button class="btn btn-safety hidden" id="addBtn" onclick="openForm(null)" data-testid="add-btn"><i class="fa-solid fa-plus"></i> Tambah</button>
-      </div>
-    </header>
-
-    <section id="content" class="flex-1 p-6 overflow-auto scroll-thin"></section>
-  </main>
-</div>
-
-<!-- ===== MODAL ===== -->
-<div class="modal-backdrop" id="modal">
-  <div class="modal">
-    <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-      <h3 class="font-bold text-slate-900" id="modalTitle">Form</h3>
-      <button onclick="closeForm()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <!-- LAYER APPSHEET -->
+    <div id="appsheetLayer" class="appsheet-layer">
+        <div class="gradient-border-hover" style="border-radius: 30px; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10003;">
+            <button class="btn-kembali-dash shine-effect" onclick="tutupAppSheet()" style="position: static; transform: none;">
+                <i class="fas fa-arrow-left"></i> <span>Kembali ke Dashboard</span>
+            </button>
+        </div>
+        <iframe id="iframeAppSheet" class="appsheet-frame-content" src=""></iframe>
     </div>
-    <div class="p-6 overflow-y-auto scroll-thin flex-1" id="modalBody"></div>
-    <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-2 bg-slate-50">
-      <button class="btn btn-ghost" onclick="closeForm()">Batal</button>
-      <button class="btn btn-primary" onclick="saveForm()" data-testid="save-btn"><i class="fa-solid fa-floppy-disk"></i> Simpan</button>
+
+    <!-- MODAL QR CODE ASET/ALAT -->
+    <div id="qrModal" class="photo-modal" onclick="closeQrModal(event)">
+        <div class="qr-modal-content">
+            <span class="close-modal" style="top: 15px; right: 20px;" onclick="closeQrModal(event)">&times;</span>
+            <h3 id="qrTitle" style="color: var(--text-main); font-weight: 700; margin-bottom: 5px;">Label Aset/Alat</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Pindai untuk melihat detail sistem.</p>
+            
+            <div id="qrCodeContainer" class="qr-container"></div>
+            
+            <div class="qr-actions">
+                <button class="btn btn-excel shine-effect" onclick="downloadQRCode()"><i class="fas fa-download"></i> Unduh QR</button>
+                <button class="btn btn-print shine-effect" onclick="printQRCode()"><i class="fas fa-print"></i> Print QR</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-/* ================================================================
-   HSE ERP FRONTEND
-   Ganti BACKEND_URL dengan URL Web App Google Apps Script Anda.
-   ================================================================ */
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyb0DEAUziRswV1wJoIVmOjq9Yw-mKs2iWv9qBMm9xzMZafkX2eRjuLZ6FSyXGbsMUwMw/exec'; // <-- ganti setelah deploy Code.gs
-
-/* ------- Modul definisi ------- */
-const MODULES = [
-  { group:'Dashboard', items:[
-    { id:'dashboard', label:'Dashboard', icon:'chart-line' }
-  ]},
-  { group:'Master Data', items:[
-    { id:'Karyawan', label:'Karyawan', icon:'user-tie' },
-    { id:'Departemen', label:'Departemen', icon:'building' },
-    { id:'Jabatan', label:'Jabatan', icon:'id-card' },
-    { id:'AreaKerja', label:'Area Kerja', icon:'location-dot' },
-    { id:'Alat', label:'Alat/Equipment', icon:'gears' },
-    { id:'APD', label:'APD', icon:'shield-halved' },
-    { id:'BahanKimia', label:'Bahan Kimia', icon:'flask-vial' },
-    { id:'Kontraktor', label:'Kontraktor', icon:'handshake' },
-  ]},
-  { group:'Risiko & Perencanaan', items:[
-    { id:'HIRADC', label:'HIRADC', icon:'triangle-exclamation' },
-    { id:'JSA', label:'Job Safety Analysis', icon:'clipboard-list' },
-    { id:'IzinKerja', label:'Izin Kerja (PTW)', icon:'file-signature' },
-  ]},
-  { group:'Insiden & Investigasi', items:[
-    { id:'Insiden', label:'Laporan Insiden', icon:'bell' },
-    { id:'Investigasi', label:'Investigasi', icon:'magnifying-glass' },
-  ]},
-  { group:'Inspeksi', items:[
-    { id:'InspeksiAPD', label:'Inspeksi APD', icon:'circle-check' },
-    { id:'InspeksiAlat', label:'Inspeksi Alat', icon:'screwdriver-wrench' },
-    { id:'InspeksiAPAR', label:'Inspeksi APAR', icon:'fire-extinguisher' },
-  ]},
-  { group:'People & Health', items:[
-    { id:'TransaksiAPD', label:'Transaksi APD', icon:'box-open' },
-    { id:'Pelatihan', label:'Pelatihan', icon:'graduation-cap' },
-    { id:'Medical', label:'Pemeriksaan Medis', icon:'stethoscope' },
-  ]},
-  { group:'Lingkungan', items:[
-    { id:'Limbah', label:'Manifest Limbah', icon:'trash-can' },
-    { id:'Monitoring', label:'Monitoring Lingkungan', icon:'leaf' },
-  ]},
-  { group:'Governance', items:[
-    { id:'Rapat', label:'Rapat', icon:'users' },
-    { id:'Audit', label:'Audit', icon:'file-shield' },
-    { id:'Drill', label:'Emergency Drill', icon:'people-arrows' },
-    { id:'Users', label:'Users', icon:'user-shield' },
-  ]},
-];
-
-/* Field mapping enum untuk auto-dropdown */
-const FIELD_ENUM_MAP = {
-  'Role':'Role','Status':'StatusAktif','Jenis Kelamin':'JenisKelamin','Golongan Darah':'GolonganDarah',
-  'Status Karyawan':'StatusKaryawan','Level Risiko Jabatan':'LevelRisiko','Level Risiko':'LevelRisiko',
-  'Jenis Bahaya Utama':'JenisBahaya','Kategori Bahaya':'JenisBahaya','Status Alat':'StatusAlat',
-  'Kondisi':'KondisiInspeksi','Kondisi Umum':'KondisiInspeksi','Kondisi Fisik':'KondisiFisikAPAR',
-  'Klasifikasi Bahaya':'KlasifikasiBahayaKimia','Wujud':'WujudBahan','Aktivitas Pekerjaan':'AktivitasKerja',
-  'Hirarki Pengendalian':'HirarkiPengendalian','Jenis Insiden':'JenisInsiden','Bagian Tubuh Cedera':'BagianTubuh',
-  'Penyebab Langsung':'PenyebabLangsung','Status Investigasi':'StatusInvestigasi','Dibawa ke RS':'YaTidak',
-  'Isi Ulang':'YaTidak','Jenis Izin':'JenisIzinKerja','Alasan':'AlasanAPD','Hasil':'HasilPelatihan',
-  'Jenis Pemeriksaan':'JenisPemeriksaanMedis','Hasil Umum':'HasilMedis','Jenis Limbah':'JenisLimbah',
-  'Satuan':'SatuanLimbah','Parameter':'ParameterLingkungan','Jenis Audit':'JenisAudit',
-  'Kategori Temuan':'KategoriTemuan','Jenis Drill':'JenisDrill','Evaluasi':'HasilEvaluasi',
-};
-const FIELD_REF_MAP = {
-  'Departemen':'Departemen','Kepala Departemen':'Karyawan','Area Kerja':'AreaKerja',
-  'Area/Departemen':'AreaKerja','Area Kejadian':'AreaKerja','Area Diaudit':'AreaKerja',
-  'Nama Karyawan':'Karyawan','Nama Korban':'Karyawan','Nama Peserta':'Karyawan',
-  'Kode Alat':'Alat','Jenis APD':'APD','Kontraktor':'Kontraktor','Jabatan':'Jabatan',
-  'No Laporan Terkait':'Insiden'
-};
-
-/* State */
-const state = { user:null, current:'dashboard', schema:{}, enums:{}, data:[], editingRow:null, cache:{}, statusMap:{}, dateField:null };
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-const toast = (msg, type='success') => {
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.style.background = type==='error'?'#dc2626':type==='warn'?'#f59e0b':'#10b981';
-  el.innerHTML = `<i class="fa-solid fa-${type==='error'?'circle-xmark':type==='warn'?'triangle-exclamation':'circle-check'}"></i> ${msg}`;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 3200);
-};
-
-/* ------- Utility Tools ------- */
-function isExpiryField(h){ return /berikutnya|berlaku sampai|masa berlaku|kadaluarsa/i.test(h); }
-function isImageUrlField(h){ return /foto|ttd|tanda tangan|signature/i.test(h); }
-function daysUntil(dateStr){ if(!dateStr) return null; const d=new Date(dateStr); if(isNaN(d)) return null; return Math.floor((d - new Date())/(1000*60*60*24)); }
-function isLong(h){ return /Kronologi|Deskripsi|Langkah|Temuan|Rekomendasi|Notulen|Agenda|Skenario|Evaluasi|Tindakan|Pengendalian|Catatan|Faktor|Akar Masalah|Identifikasi|Potensi|Peserta/i.test(h); }
-function isRequired(h,s){ return (state.schema[s]||[])[0] === h && !['Insiden','Investigasi','IzinKerja','InspeksiAPD','InspeksiAlat','InspeksiAPAR','TransaksiAPD','Pelatihan','Medical','Limbah','Monitoring','Rapat','Audit','Drill','HIRADC','JSA'].includes(s); }
-
-/* ------- API helpers ------- */
-async function apiGet(params) {
-  const url = new URL(BACKEND_URL);
-  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k,v));
-  const r = await fetch(url.toString());
-  return r.json();
-}
-async function apiPost(body) {
-  // Use text/plain to avoid CORS preflight on Google Apps Script
-  const r = await fetch(BACKEND_URL, {
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify(body),
-    redirect:'follow'
-  });
-  return r.json();
-}
-
-/* ------- Auth ------- */
-$('#loginForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  if (BACKEND_URL.includes('PASTE_WEB_APP_URL')) {
-    $('#lgErr').classList.remove('hidden');
-    $('#lgErr').textContent = 'BACKEND_URL belum diisi. Buka file HTML dan ganti URL Web App Anda.';
-    return;
-  }
-  const btn = e.target.querySelector('button');
-  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
-  try {
-    const res = await apiPost({ action:'login', username:$('#lgUser').value.trim(), password:$('#lgPass').value });
-    if (!res.ok) throw new Error(res.msg);
-    state.user = res.user;
-    localStorage.setItem('hse_user', JSON.stringify(res.user));
-    await bootApp();
-  } catch(err) {
-    $('#lgErr').classList.remove('hidden');
-    $('#lgErr').textContent = err.message || 'Login gagal';
-  } finally {
-    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk';
-  }
-});
-
-function logout() {
-  localStorage.removeItem('hse_user');
-  state.user = null;
-  $('#appView').classList.add('hidden');
-  $('#loginView').classList.remove('hidden');
-}
-
-/* ------- Boot ------- */
-async function bootApp() {
-  $('#loginView').classList.add('hidden');
-  $('#appView').classList.remove('hidden');
-  $('#userName').textContent = state.user.name;
-  $('#userRole').textContent = state.user.role + ' • ' + (state.user.dept||'');
-  $('#userAvatar').textContent = (state.user.name||'U').charAt(0).toUpperCase();
-  renderSidebar();
-  // Load enums + schema in parallel
-  const [en, sc] = await Promise.all([apiGet({action:'enums'}), apiGet({action:'schema'})]);
-  state.enums = en.data || {}; state.schema = sc.data || {};
-  navigate('dashboard');
-}
-
-function renderSidebar() {
-  const sb = $('#sidebar'); sb.innerHTML = '';
-  MODULES.forEach(g => {
-    const grp = document.createElement('div');
-    grp.innerHTML = `<div class="text-[10px] uppercase font-bold text-slate-400 px-3 pt-3 pb-1 tracking-wider">${g.group}</div>`;
-    g.items.forEach(it => {
-      const a = document.createElement('a');
-      a.href = '#'; a.dataset.id = it.id;
-      a.className = 'side-item flex items-center gap-3 px-3 py-2 rounded-lg text-slate-700 cursor-pointer';
-      a.innerHTML = `<i class="fa-solid fa-${it.icon} w-4 text-center"></i><span>${it.label}</span>`;
-      a.setAttribute('data-testid', 'nav-' + it.id.toLowerCase());
-      a.onclick = e => { e.preventDefault(); navigate(it.id); };
-      grp.appendChild(a);
-    });
-    sb.appendChild(grp);
-  });
-}
-
-/* ------- Navigation ------- */
-async function navigate(id) {
-  state.current = id;
-  $$('#sidebar .side-item').forEach(el => el.classList.toggle('active', el.dataset.id === id));
-  const mod = findModule(id);
-  $('#pageTitle').textContent = mod?.label || id;
-  $('#pageSub').textContent = id==='dashboard' ? 'Ringkasan indikator kinerja HSE' : `Kelola data ${mod?.label||''} - tersimpan realtime ke Google Sheets`;
-  $('#addBtn').classList.toggle('hidden', id==='dashboard');
-  $('#exportXlsxBtn').classList.toggle('hidden', id==='dashboard');
-  $('#exportPdfBtn').classList.toggle('hidden', id==='dashboard');
-
-  if (id === 'dashboard') await renderDashboard();
-  else await renderTable(id);
-}
-
-function findModule(id) {
-  for (const g of MODULES) for (const it of g.items) if (it.id === id) return it;
-  return null;
-}
-
-function refreshCurrent() { navigate(state.current); }
-
-/* ------- Dashboard ------- */
-async function renderDashboard() {
-  const c = $('#content');
-  c.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="kpi">
-    ${['Karyawan Aktif','Insiden Tahun Ini','Izin Kerja Aktif','Alat Layak Operasi'].map(t=>`<div class="kpi-card"><div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">${t}</div><div class="text-3xl font-extrabold text-slate-900 mt-2">—</div></div>`).join('')}
-  </div>
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-    <div class="kpi-card lg:col-span-2"><div class="flex items-center justify-between mb-3"><h3 class="font-bold text-slate-900">Tren Insiden ${new Date().getFullYear()}</h3><span class="badge b-blue">Per bulan</span></div><canvas id="chIns" height="110"></canvas></div>
-    <div class="kpi-card"><h3 class="font-bold text-slate-900 mb-3">Distribusi Level Risiko (HIRADC)</h3><canvas id="chRisk" height="180"></canvas></div>
-    <div class="kpi-card"><h3 class="font-bold text-slate-900 mb-3">Jenis Insiden</h3><canvas id="chType" height="180"></canvas></div>
-    <div class="kpi-card lg:col-span-2"><h3 class="font-bold text-slate-900 mb-3">Status Alat/Equipment</h3><canvas id="chAlat" height="110"></canvas></div>
-  </div>`;
-
-  try {
-    const r = await apiGet({ action:'dashboard' });
-    if (!r.ok) throw new Error(r.msg);
-    const d = r.data;
-    const kpis = ['#kpi > div:nth-child(1)','#kpi > div:nth-child(2)','#kpi > div:nth-child(3)','#kpi > div:nth-child(4)'];
-    const vals = [d.totalKaryawan, d.insidenThnIni, d.izinAktif, `${d.alatLayak}/${d.totalAlat}`];
-    kpis.forEach((s,i) => $(s).querySelector('.text-3xl').textContent = vals[i]);
-
-    new Chart($('#chIns'), { type:'line', data:{ labels:['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'], datasets:[{ label:'Insiden', data:d.insidenByMonth, borderColor:'#1e40af', backgroundColor:'rgba(30,64,175,.12)', fill:true, tension:.35, borderWidth:2, pointRadius:4, pointBackgroundColor:'#10b981' }] }, options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}} }});
-    new Chart($('#chRisk'), { type:'doughnut', data:{ labels:Object.keys(d.risikoDist), datasets:[{ data:Object.values(d.risikoDist), backgroundColor:['#10b981','#f59e0b','#f97316','#dc2626'], borderWidth:0 }] }, options:{ plugins:{legend:{position:'bottom',labels:{font:{size:11}}}} }});
-    new Chart($('#chType'), { type:'polarArea', data:{ labels:Object.keys(d.insidenByType), datasets:[{ data:Object.values(d.insidenByType), backgroundColor:['#1e40af','#2563eb','#10b981','#f59e0b','#dc2626','#8b5cf6','#ec4899','#06b6d4'] }] }, options:{ plugins:{legend:{position:'bottom',labels:{font:{size:10}}}} }});
-    new Chart($('#chAlat'), { type:'bar', data:{ labels:Object.keys(d.alatStatus), datasets:[{ label:'Jumlah', data:Object.values(d.alatStatus), backgroundColor:['#10b981','#f59e0b','#dc2626','#64748b'], borderRadius:6 }] }, options:{ plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}} }});
-  } catch(err) {
-    c.innerHTML += `<div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">Gagal memuat dashboard: ${err.message}</div>`;
-  }
-}
-
-/* ------- Table View & Filters ------- */
-async function renderTable(sheet) {
-  const c = $('#content');
-  const headers = state.schema[sheet] || [];
-  const dateField = headers.find(h => /^Tanggal/i.test(h)) || null;
-  const dateFilterUI = dateField ? `
-    <div class="flex items-center gap-2">
-      <span class="text-xs font-semibold text-slate-500 uppercase">${dateField}:</span>
-      <input type="date" class="input" style="width:150px" id="filterFrom" oninput="filterTable()" data-testid="filter-from"/>
-      <span class="text-slate-400">—</span>
-      <input type="date" class="input" style="width:150px" id="filterTo" oninput="filterTable()" data-testid="filter-to"/>
-      <select class="select" style="width:120px" id="filterMonth" oninput="applyMonthFilter()" data-testid="filter-month">
-        <option value="">Semua Bulan</option>
-        ${['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'].map((n,i)=>`<option value="${i}">${n}</option>`).join('')}
-      </select>
-      <button class="btn btn-ghost" onclick="clearDateFilter()" title="Reset filter tanggal"><i class="fa-solid fa-xmark"></i></button>
-    </div>` : '';
-  
-  c.innerHTML = `<div class="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-    <div class="p-4 border-b border-slate-200 flex items-center gap-3 flex-wrap">
-      <div class="relative flex-1 min-w-[220px] max-w-md">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input class="input pl-9" id="searchInput" placeholder="Cari..." oninput="filterTable()" data-testid="search-input"/>
-      </div>
-      ${dateFilterUI}
-      <div class="text-sm text-slate-500 ml-auto" id="tableCount">-</div>
+    <!-- MODAL CHECKLIST ALAT & MESIN (BARU) -->
+    <div id="checklistModal" class="photo-modal" onclick="closeChecklistModal(event)">
+        <div class="qr-modal-content">
+            <span class="close-modal" style="top: 15px; right: 20px;" onclick="closeChecklistModal(event)">&times;</span>
+            <h3 style="color: var(--text-main); font-weight: 700; margin-bottom: 5px;">Checklist Alat & Mesin</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Scan QR atau Copy Link di bawah ini.</p>
+            
+            <div id="checklistQrContainer" class="qr-container"></div>
+            
+            <div style="margin-bottom: 15px; width: 100%;">
+                <input type="text" id="checklistLinkInput" value="https://murindasentrabaja.github.io/Checklist-Alat-dan-Mesin-HSE/" readonly style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); text-align: center; font-size: 13px; background: rgba(255,255,255,0.7); outline: none; color: var(--text-main); font-weight: 500;">
+            </div>
+            
+            <div class="qr-actions">
+                <a href="https://murindasentrabaja.github.io/Checklist-Alat-dan-Mesin-HSE/" target="_blank" class="btn btn-refresh shine-effect" style="text-decoration: none; color: #1d4ed8;"><i class="fas fa-external-link-alt"></i> Buka Link</a>
+                <button class="btn btn-excel shine-effect" onclick="copyChecklistLink()"><i class="fas fa-copy"></i> Copy Link</button>
+                <button class="btn btn-print shine-effect" onclick="printChecklistQR()"><i class="fas fa-print"></i> Print QR</button>
+            </div>
+        </div>
     </div>
-    <div class="overflow-auto scroll-thin" style="max-height:calc(100vh - 250px)"><table class="data-table" id="dt"><thead></thead><tbody></tbody></table></div>
-  </div>`;
-  
-  state.dateField = dateField;
 
-  const res = await apiGet({ action:'list', sheet });
-  if (!res.ok) { toast(res.msg||'Gagal memuat', 'error'); return; }
-  state.data = res.data || [];
-  state.cache[sheet] = state.data;
+    <div class="sidebar glass-panel">
+        <div class="sidebar-brand">
+            <img src="MSB Logo.png" alt="PT Murinda Sentra Baja Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/130x60/transparent/334155?text=MSB+Logo'">
+            <h2>HSE System</h2>
+            <p>PT Murinda Sentra Baja</p>
+        </div>
+        
+        <div class="gradient-border-hover" style="border-radius: 12px; margin: 20px 14px 5px 14px;">
+            <button class="btn-masuk-sistem shine-effect" onclick="bukaLogin()" style="margin: 0; width: 100%;">
+                <i class="fas fa-desktop"></i> <span>MSB HSE System</span>
+            </button>
+        </div>
+        
+        <!-- TAMBAHAN TOMBOL CHECKLIST ALAT & MESIN DI SIDEBAR -->
+        <div class="gradient-border-hover" style="border-radius: 12px; margin: 10px 14px 5px 14px;">
+            <button class="btn-checklist shine-effect" onclick="showChecklistModal()" style="margin: 0; width: 100%;">
+                <i class="fas fa-clipboard-check"></i> <span>Checklist Alat & Mesin</span>
+            </button>
+        </div>
 
-  const visibleHeaders = headers.filter(h => h !== 'PasswordHash');
-  const thead = $('#dt thead');
-  thead.innerHTML = '<tr>' + visibleHeaders.map(h=>`<th>${h}</th>`).join('') + '<th style="width:100px">Aksi</th></tr>';
-  renderRows(visibleHeaders);
-}
+        <div class="sidebar-menu-wrapper">
+            <div class="menu-title">Navigasi Menu</div>
+            <ul class="sidebar-menu" id="tabsContainer"></ul>
+        </div>
+        
+        <div class="sidebar-footer">
+            PT Murinda Sentra Baja<br>
+            <span>Developed by <strong>Aspuro Amarulloh Khoiri</strong></span>
+        </div>
+    </div>
 
-function renderRows(headers) {
-  const q = ($('#searchInput')?.value||'').toLowerCase();
-  const df = state.dateField;
-  const from = df ? $('#filterFrom')?.value : '';
-  const to = df ? $('#filterTo')?.value : '';
-  
-  const rows = state.data.filter(r => {
-    if (q && !JSON.stringify(r).toLowerCase().includes(q)) return false;
-    if (df && (from || to)) {
-      const raw = r[df]; if (!raw) return false;
-      const dv = new Date(raw); if (isNaN(dv)) return false;
-      const ds = fmtDate(dv);
-      if (from && ds < from) return false;
-      if (to && ds > to) return false;
-    }
-    return true;
-  });
+    <div class="main-content">
 
-  const tbody = $('#dt tbody');
-  tbody.innerHTML = rows.map(r => {
-    return '<tr>' + headers.map(h => {
-      let v = r[h]; if (v instanceof Date) v = fmtDate(v);
-      if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) v = fmtDate(new Date(v));
-      
-      // Image URL / TTD -> thumbnail
-      if (isImageUrlField(h) && v && /^https?:\/\//i.test(String(v))) {
-        return `<td><a href="${v}" target="_blank"><img src="${v}" class="w-10 h-10 rounded object-cover border border-slate-200"/></a></td>`;
-      }
-      if (isImageUrlField(h) && v && String(v).startsWith('data:image')) {
-        return `<td><img src="${v}" class="w-16 h-8 object-contain border border-slate-200 rounded bg-white"/></td>`;
-      }
-      
-      // Expiry warning
-      if (isExpiryField(h) && v) {
-        const days = daysUntil(v);
-        if (days !== null && days < 0) return `<td><span class="badge b-red" title="Kadaluarsa ${Math.abs(days)} hari lalu"><i class="fa-solid fa-circle-exclamation mr-1"></i>${v} • Expired</span></td>`;
-        if (days !== null && days <= 30) return `<td><span class="badge b-yellow" title="Akan expired ${days} hari lagi"><i class="fa-solid fa-clock mr-1"></i>${v} • ${days}h lagi</span></td>`;
-        return `<td><span class="badge b-green">${v}</span></td>`;
-      }
-      
-      // Level Risiko badge
-      if (h === 'Level Risiko' && v) return `<td><span class="badge risk-${String(v).replace(' ','')}">${v}</span></td>`;
-      if (h === 'Status' || h === 'Status Alat' || h === 'Status Karyawan' || h === 'Status Investigasi' || h === 'Status Tindak Lanjut') {
-        const cl = /aktif|layak|closed|selesai|memenuhi|lulus|fit\b|baik/i.test(String(v))?'b-green':/perlu|overdue|melebihi|unfit|open/i.test(String(v))?'b-red':/progress|sedang|draft/i.test(String(v))?'b-yellow':'b-gray';
-        return `<td><span class="badge ${cl}">${v||'-'}</span></td>`;
-      }
-      return `<td>${v==null||v===''?'<span class="text-slate-300">—</span>':escapeHtml(String(v))}</td>`;
-    }).join('') + `<td>
-      <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="openForm(${r._row})" title="Edit" data-testid="edit-${r._row}"><i class="fa-solid fa-pen"></i></button>
-      <button class="text-red-600 hover:text-red-800" onclick="delRow(${r._row})" title="Hapus" data-testid="delete-${r._row}"><i class="fa-solid fa-trash"></i></button>
-    </td></tr>`;
-  }).join('');
-  $('#tableCount').textContent = `${rows.length} dari ${state.data.length} data`;
-}
+        <div class="global-summary" id="globalSummaryContainer"></div>
 
-function filterTable() { 
-  const headers = (state.schema[state.current]||[]).filter(h=>h!=='PasswordHash'); 
-  renderRows(headers); 
-}
+        <div class="header-panel glass-panel">
+            <div class="page-title-wrapper">
+                <button class="btn-mobile-menu shine-effect" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1 id="activeSheetTitle">HSE Report</h1>
+                    <p>Data Tersinkronisasi Otomatis Dengan MSB ERP System</p>
+                </div>
+            </div>
+            
+            <div class="action-bar">
+                <div class="search-wrapper gradient-border-hover" style="border-radius: 10px;">
+                    <input type="text" id="tableSearch" class="search-input" placeholder="Pencarian Global..." onkeyup="filterTableData()">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-refresh shine-effect gradient-border-hover" onclick="fetchData()">
+                        <i class="fas fa-sync-alt"></i> <span>Refresh Data</span>
+                    </button>
+                    <button class="btn btn-excel shine-effect gradient-border-hover" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> <span>Export Excel</span>
+                    </button>
+                    <button class="btn btn-print shine-effect gradient-border-hover" onclick="window.print()">
+                        <i class="fas fa-print"></i> <span>Print Report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-function applyMonthFilter() {
-  const m = $('#filterMonth')?.value;
-  if (m === '' || m == null) { $('#filterFrom').value=''; $('#filterTo').value=''; }
-  else {
-    const y = new Date().getFullYear();
-    const from = new Date(y, Number(m), 1);
-    const to = new Date(y, Number(m)+1, 0);
-    $('#filterFrom').value = fmtDate(from);
-    $('#filterTo').value = fmtDate(to);
-  }
-  filterTable();
-}
+        <!-- FILTER UNTUK KARYAWAN -->
+        <div class="filter-panel glass-panel" id="karyawanFilterPanel">
+            <div class="filter-group">
+                <label>Departemen</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterDept" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Departemen</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Jabatan</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterJabatan" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Jabatan</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Nama Karyawan</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterNama" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Nama</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Status MCU</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterMcu" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Status MCU</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-function clearDateFilter() {
-  if ($('#filterFrom')) $('#filterFrom').value = '';
-  if ($('#filterTo')) $('#filterTo').value = '';
-  if ($('#filterMonth')) $('#filterMonth').value = '';
-  filterTable();
-}
+        <!-- FILTER UNTUK CHECKLIST ALAT & MESIN -->
+        <div class="filter-panel glass-panel" id="checklistFilterPanel" style="display: none;">
+            <div class="filter-group">
+                <label>Jenis Alat</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterJenisAlat" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Jenis Alat</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Nama Alat</label>
+                <div class="gradient-border-hover" style="border-radius: 10px;">
+                    <select id="filterNamaAlat" class="filter-select" onchange="filterTableData()">
+                        <option value="">Semua Nama Alat</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-function fmtDate(d){ if(!(d instanceof Date)||isNaN(d))return ''; return d.toISOString().split('T')[0]; }
-function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        <div class="content-card glass-panel">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <div class="loading-text">Menyiapkan data dari MSB ERP System...</div>
+            </div>
+            
+            <div id="tablesContainer">
+                <div style="text-align:center; padding: 60px; color: var(--text-muted);">
+                    <i class="fas fa-satellite-dish" style="font-size: 54px; margin-bottom: 20px; color: rgba(148,163,184,0.3); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));"></i>
+                    <h2 style="color: var(--text-main); text-shadow: 0 1px 2px rgba(255,255,255,0.9);">Menunggu Sinkronisasi MSB ERP System...</h2>
+                    <p style="margin-top: 5px;">Klik tombol <strong>Refresh Data</strong> untuk memuat data.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-/* ------- Form Modal ------- */
-async function openForm(row) {
-  const sheet = state.current;
-  const headers = (state.schema[sheet]||[]).filter(h => h !== 'PasswordHash');
-  const existing = row ? state.data.find(r => r._row === row) : {};
-  state.editingRow = row;
-  $('#modalTitle').textContent = (row?'Edit ':'Tambah ') + (findModule(sheet)?.label||sheet);
+    <div id="photoModal" class="photo-modal" onclick="closeModal(event)">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content glass-panel" id="modalImg">
+        <div id="modalCaption"></div>
+    </div>
 
-  // Pre-load reference data
-  const refSheets = [...new Set(headers.map(h => FIELD_REF_MAP[h]).filter(Boolean))];
-  await Promise.all(refSheets.map(async s => {
-    if (!state.cache[s]) {
-      const r = await apiGet({ action:'list', sheet:s });
-      if (r.ok) state.cache[s] = r.data;
-    }
-  }));
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUHQnn4swXg-4h-YHKr6Z3rkjgYVGIl7WE0tkaTL7y8WYh2fKK_1oPISiiXf0rIbCR/exec"; 
+        const APPSHEET_APP_NAME = "MSBHumanResource-310640119"; 
+        // ID Spreadsheet Eksternal untuk Data Alat
+        const DATA_ALAT_SHEET_ID = "1lGlWzWxQAv5mhzTlVpQCyIY1tUcr6XWDQh9QFPwz7-o";
 
-  const body = $('#modalBody');
-  body.innerHTML = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' + headers.map(h => {
-    const val = existing[h] != null ? existing[h] : '';
-    const strVal = val instanceof Date ? fmtDate(val) : (typeof val==='string' && /^\d{4}-\d{2}-\d{2}T/.test(val) ? fmtDate(new Date(val)) : val);
-    return `<div class="${isLong(h)?'md:col-span-2':''}"><label class="label">${h}${isRequired(h,sheet)?' <span class="text-red-500">*</span>':''}</label>${buildField(h, strVal, sheet)}</div>`;
-  }).join('') + '</div>';
-  
-  _showModal(); // Buka modal di tahap akhir (menimpa default handler)
-}
+        let globalData = [];
+        let filterColumnMap = { dept: -1, jabatan: -1, nama: -1, mcu: -1, jenisAlat: -1, namaAlat: -1 };
+        let qrCodeInstance = null; // Menyimpan instance objek QR
 
-function closeForm() { 
-  $('#modal').classList.remove('open'); 
-  state.editingRow = null; 
-}
-document.getElementById('modal').classList.remove('open');
+        // ==========================================
+        // FUNGSI TOGGLE SIDEBAR MOBILE
+        // ==========================================
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
 
-function buildField(header, val, sheet) {
-  const id = 'f_' + header.replace(/[^a-zA-Z0-9]/g,'_');
-  
-  // Password field for Users
-  if (sheet==='Users' && header==='PasswordHash') return '';
-  if (sheet==='Users' && header==='Username' && state.editingRow) return `<input class="input" name="${header}" id="${id}" value="${escapeAttr(val)}" readonly />`;
-  
-  // Foto TKP / Upload gambar
-  if (/^Foto /i.test(header) || header === 'Foto TKP') {
-    const preview = val && /^https?:\/\//.test(String(val)) ? `<a href="${val}" target="_blank"><img src="${val}" class="w-24 h-24 object-cover rounded border border-slate-200 mb-2"/></a>` : '';
-    return `<div>${preview}<input type="file" accept="image/*" class="input" id="${id}" data-upload="1" data-name="${header}" data-existing="${escapeAttr(val)}" /><input type="hidden" name="${header}" id="${id}_hidden" value="${escapeAttr(val)}"/></div>`;
-  }
-  
-  // Tanda Tangan / TTD canvas
-  if (/^TTD /i.test(header) || /tanda tangan|signature/i.test(header)) {
-    const existing = val && String(val).startsWith('data:image') ? val : '';
-    return `<div>
-      <div class="border border-slate-300 rounded-lg bg-white" style="width:100%;max-width:360px">
-        <canvas id="${id}_canvas" width="360" height="120" style="width:100%;height:120px;cursor:crosshair;touch-action:none" data-signature="1" data-name="${header}"></canvas>
-      </div>
-      <div class="flex gap-2 mt-2">
-        <button type="button" class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="clearSig('${id}_canvas')"><i class="fa-solid fa-eraser"></i> Hapus</button>
-        ${existing?`<button type="button" class="btn btn-ghost" style="padding:5px 10px;font-size:11px" onclick="loadSig('${id}_canvas','${existing}')"><i class="fa-solid fa-image"></i> Muat TTD lama</button>`:''}
-      </div>
-      <input type="hidden" name="${header}" id="${id}_hidden" value="${escapeAttr(existing)}"/>
-    </div>`;
-  }
-  
-  // Enum -> select
-  const enumKey = FIELD_ENUM_MAP[header];
-  if (enumKey && state.enums[enumKey]) {
-    return `<select class="select" name="${header}" id="${id}"><option value="">-- Pilih --</option>${state.enums[enumKey].map(o=>`<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('')}</select>`;
-  }
-  
-  // Reference -> select from cache
-  const refKey = FIELD_REF_MAP[header];
-  if (refKey && state.cache[refKey]) {
-    const opts = state.cache[refKey].map(r => {
-      const label = r['Nama Lengkap'] || r['Nama Departemen'] || r['Nama Area'] || r['Nama Alat'] || r['Nama APD'] || r['Nama Perusahaan'] || r['Nama Jabatan'] || r['No Laporan'] || r[Object.keys(r)[0]];
-      const value = r['NIK'] || r['Kode Departemen'] || r['Kode Area'] || r['Kode Alat'] || r['Kode APD'] || r['Kode Kontraktor'] || r['Kode Jabatan'] || r['No Laporan'] || label;
-      return { label, value };
-    });
-    return `<select class="select" name="${header}" id="${id}"><option value="">-- Pilih --</option>${opts.map(o=>`<option value="${o.value}" ${o.value==val||o.label==val?'selected':''}>${o.label}</option>`).join('')}</select>`;
-  }
-  
-  // Password
-  if (/password/i.test(header)) return `<input type="password" class="input" name="Password" id="${id}" placeholder="${state.editingRow?'(kosongkan jika tidak diganti)':'Password'}" />`;
-  // Date
-  if (/tanggal|masa berlaku|target|berlaku sampai/i.test(header)) return `<input type="date" class="input" name="${header}" id="${id}" value="${val||''}" />`;
-  // Time
-  if (/jam/i.test(header)) return `<input type="time" class="input" name="${header}" id="${id}" value="${val||''}" />`;
-  // Number
-  if (/severity|likelihood|jumlah|kapasitas|masa pakai|hari hilang|tahun|jumlah peserta|waktu evakuasi|tekanan/i.test(header)) {
-    const max = /severity|likelihood/i.test(header) ? 5 : '';
-    return `<input type="number" class="input" name="${header}" id="${id}" value="${val||''}" ${max?'max="'+max+'" min="1"':''} />`;
-  }
-  // Long text
-  if (isLong(header)) return `<textarea class="textarea" rows="3" name="${header}" id="${id}">${escapeAttr(val)}</textarea>`;
-  
-  // Default
-  return `<input class="input" name="${header}" id="${id}" value="${escapeAttr(val)}" />`;
-}
+        // ==========================================
+        // FUNGSI LOGIN & BUKA APPSHEET
+        // ==========================================
+        function bukaLogin() {
+            document.getElementById('loginOverlay').style.display = 'block';
+            muatDataUser();
+        }
 
-function escapeAttr(v){ return String(v==null?'':v).replace(/"/g,'&quot;'); }
+        function tutupLogin() {
+            document.getElementById('loginOverlay').style.display = 'none';
+        }
 
-function _showModal(){ 
-  $('#modal').classList.add('open'); 
-  initSignatureCanvases(); 
-}
+        function muatDataUser() {
+            const dropdown = document.getElementById('dropdownUser');
+            if (dropdown.options.length > 1) return; 
+            
+            try {
+                dropdown.innerHTML = '<option value="">-- Silakan Pilih User --</option>';
+                const loginSheet = globalData.find(s => s.sheetName.toLowerCase() === "login");
+                
+                if (loginSheet && loginSheet.data.length > 1) {
+                    for(let i = 1; i < loginSheet.data.length; i++) {
+                        let user = loginSheet.data[i][0]; 
+                        if(user && user.toString().trim() !== "") {
+                            let userStr = user.toString().trim();
+                            dropdown.innerHTML += `<option value="${userStr}">${userStr}</option>`;
+                        }
+                    }
+                } else {
+                    dropdown.innerHTML = '<option value="">-- Data User Belum Tersedia --</option>';
+                }
+            } catch (error) {
+                console.error("Gagal memuat user login:", error);
+                dropdown.innerHTML = '<option value="">Gagal menyinkronisasi data user.</option>';
+            }
+        }
 
-/* ------- Signature Canvas ------- */
-function initSignatureCanvases() {
-  document.querySelectorAll('canvas[data-signature="1"]').forEach(canvas => {
-    if (canvas.dataset.inited) return;
-    canvas.dataset.inited = '1';
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    let drawing = false, last = null;
-    
-    const getPos = e => {
-      const r = canvas.getBoundingClientRect();
-      const t = e.touches ? e.touches[0] : e;
-      return { x: (t.clientX - r.left) * (canvas.width/r.width), y: (t.clientY - r.top) * (canvas.height/r.height) };
-    };
-    const start = e => { e.preventDefault(); drawing = true; last = getPos(e); };
-    const move = e => { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last = p; canvas.dataset.dirty='1'; };
-    const end = () => { drawing = false; };
-    
-    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
-    canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',end);
-    
-    // Preload existing if hidden has data
-    const hidden = document.getElementById(canvas.id.replace('_canvas','_hidden'));
-    if (hidden && hidden.value && hidden.value.startsWith('data:image')) {
-      const img = new Image();
-      img.onload = () => ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      img.src = hidden.value;
-    }
-  });
-}
+        function prosesLoginAppSheet() {
+            const user = document.getElementById('dropdownUser').value;
+            if (!user) {
+                alert("Harap pilih User dari dropdown terlebih dahulu untuk melanjutkan.");
+                return;
+            }
+            tutupLogin();
+            const urlAppSheet = "https://www.appsheet.com/start/594035d0-a21a-4650-8f10-82b3c864cbb9";
+            document.getElementById('iframeAppSheet').src = urlAppSheet;
+            document.getElementById('appsheetLayer').classList.add('active');
+        }
 
-function clearSig(canvasId) {
-  const c = document.getElementById(canvasId); const ctx = c.getContext('2d');
-  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,c.width,c.height);
-  c.dataset.dirty = '';
-  const h = document.getElementById(canvasId.replace('_canvas','_hidden')); if (h) h.value = '';
-}
+        function tutupAppSheet() {
+            document.getElementById('appsheetLayer').classList.remove('active');
+            setTimeout(() => { document.getElementById('iframeAppSheet').src = ""; }, 600);
+        }
 
-function loadSig(canvasId, dataUrl) {
-  const c = document.getElementById(canvasId); const ctx = c.getContext('2d');
-  const img = new Image();
-  img.onload = () => { ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(img,0,0,c.width,c.height); c.dataset.dirty='1'; };
-  img.src = dataUrl;
-  const h = document.getElementById(canvasId.replace('_canvas','_hidden')); if (h) h.value = dataUrl;
-}
+        // ==========================================
+        // FUNGSI DASHBOARD UTAMA
+        // ==========================================
+        async function fetchData() {
+            if (!WEB_APP_URL || WEB_APP_URL.includes("ISI_DENGAN_LINK")) {
+                alert("Mohon pasang Link Web App Google Apps Script ke dalam variabel WEB_APP_URL.");
+                return;
+            }
 
-/* ------- File to Base64 ------- */
-function fileToBase64(file) {
-  return new Promise((resolve,reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result.split(',')[1]);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
+            const loading = document.getElementById('loadingOverlay');
+            loading.style.display = 'flex';
 
-/* ------- Simpan Data ------- */
-async function saveForm() {
-  const sheet = state.current;
-  const body = $('#modalBody');
-  const saveBtn = document.querySelector('[data-testid="save-btn"]');
-  saveBtn.disabled = true; 
-  const oldTxt = saveBtn.innerHTML; 
-  saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+            try {
+                // 1. Fetch data dari GAS Web App Utama
+                const response = await fetch(WEB_APP_URL);
+                if (!response.ok) throw new Error("Gagal memuat data dari Web App");
+                const data = await response.json();
+                
+                globalData = data;
 
-  // Capture signature canvases -> hidden input
-  body.querySelectorAll('canvas[data-signature="1"]').forEach(c => {
-    if (c.dataset.dirty === '1') {
-      const h = document.getElementById(c.id.replace('_canvas','_hidden'));
-      if (h) h.value = c.toDataURL('image/png');
-    }
-  });
+                // 2. Fetch data paralel dari Google Sheet Data Alat (Client-Side)
+                try {
+                    const extUrl = `https://docs.google.com/spreadsheets/d/${DATA_ALAT_SHEET_ID}/gviz/tq?tqx=out:json&sheet=Data%20Alat`;
+                    const extRes = await fetch(extUrl);
+                    const extText = await extRes.text();
+                    
+                    // Parse respon JSON dari Google Visualization API
+                    const jsonString = extText.substring(47).slice(0, -2);
+                    const extJson = JSON.parse(jsonString);
+                    
+                    const headers = extJson.table.cols.map(c => c.label);
+                    const rows = extJson.table.rows.map(r => r.c.map(cell => cell && cell.v !== null ? cell.v.toString() : ""));
+                    
+                    // Append data alat secara dinamis sebagai Sheet Baru
+                    globalData.push({ sheetName: "Data Alat", data: [headers, ...rows] });
+                } catch(e) {
+                    console.error("Gagal sinkronisasi data dari Sheet Data Alat:", e);
+                }
 
-  // Upload files -> hidden input URL
-  const fileInputs = body.querySelectorAll('input[data-upload="1"]');
-  try {
-    for (const fi of fileInputs) {
-      if (fi.files && fi.files[0]) {
-        const f = fi.files[0];
-        const b64 = await fileToBase64(f);
-        const up = await apiPost({ action:'upload', filename: f.name, mimeType: f.type, base64: b64 });
-        if (!up.ok) throw new Error(up.msg||'Upload gagal');
-        const hidden = document.getElementById(fi.id + '_hidden'); if (hidden) hidden.value = up.url;
-      }
-    }
-  } catch(err) { 
-    saveBtn.disabled = false; 
-    saveBtn.innerHTML = oldTxt; 
-    toast('Gagal upload: '+err.message,'error'); 
-    return; 
-  }
+                renderGlobalSummary(globalData);
+                renderDashboard(globalData);
 
-  const inputs = body.querySelectorAll('input,select,textarea');
-  const data = {};
-  inputs.forEach(el => {
-    const name = el.name; if (!name) return;
-    if (el.type === 'file') return;
-    if (el.value !== '') data[name] = el.value;
-  });
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Gagal memuat data dari Spreadsheet. Pastikan URL Apps Script benar.");
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
 
-  try {
-    const payload = state.editingRow
-      ? { action:'update', sheet, row: state.editingRow, data }
-      : { action:'create', sheet, data };
-    const res = await apiPost(payload);
-    if (!res.ok) throw new Error(res.msg||'Gagal simpan');
-    
-    toast(state.editingRow ? 'Berhasil diperbarui' : 'Berhasil ditambahkan');
-    closeForm();
-    delete state.cache[sheet];
-    refreshCurrent();
-  } catch(err) { 
-    toast(err.message, 'error'); 
-  } finally { 
-    saveBtn.disabled = false; 
-    saveBtn.innerHTML = oldTxt; 
-  }
-}
+        function renderGlobalSummary(sheetsData) {
+            let totalFit = 0, totalUnfit = 0;
+            let totalHazard = 0, openHazard = 0;
+            let totalInsiden = 0, openInsiden = 0;
 
-async function delRow(row) {
-  if (!confirm('Yakin ingin menghapus data ini? Aksi ini tidak bisa dibatalkan.')) return;
-  try {
-    const res = await apiPost({ action:'delete', sheet: state.current, row });
-    if (!res.ok) throw new Error(res.msg);
-    toast('Data dihapus');
-    delete state.cache[state.current];
-    refreshCurrent();
-  } catch(err) { toast(err.message, 'error'); }
-}
+            const karyawanSheet = sheetsData.find(s => s.sheetName.toLowerCase().includes("karyawan"));
+            const hazardSheet = sheetsData.find(s => s.sheetName.toLowerCase().includes("hazard"));
+            const insidenSheet = sheetsData.find(s => s.sheetName.toLowerCase().includes("insiden"));
 
-/* ------- Export ------- */
-function exportXlsx() {
-  const sheet = state.current;
-  const headers = (state.schema[sheet]||[]).filter(h => h !== 'PasswordHash');
-  const rows = state.data.map(r => headers.map(h => {
-    const v = r[h]; if (v instanceof Date) return fmtDate(v);
-    if (typeof v==='string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) return fmtDate(new Date(v));
-    return v==null?'':v;
-  }));
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, sheet);
-  XLSX.writeFile(wb, `HSE_${sheet}_${new Date().toISOString().slice(0,10)}.xlsx`);
-  toast('Excel diunduh');
-}
+            if (karyawanSheet && karyawanSheet.data.length > 1) {
+                const headers = karyawanSheet.data[0].map(h => h ? h.toString().toLowerCase().trim() : "");
+                let statusIdx = headers.findIndex(h => h.includes("status mcu") || h.includes("hasil mcu") || h === "mcu");
+                
+                for(let i = 1; i < karyawanSheet.data.length; i++) {
+                    let row = karyawanSheet.data[i];
+                    let isUnfit = false;
+                    let isFit = false;
 
-function exportPdf() {
-  const sheet = state.current;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation:'landscape' });
-  const headers = (state.schema[sheet]||[]).filter(h => h !== 'PasswordHash');
-  const rows = state.data.map(r => headers.map(h => {
-    const v = r[h]; if (v instanceof Date) return fmtDate(v);
-    if (typeof v==='string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) return fmtDate(new Date(v));
-    return v==null?'':String(v);
-  }));
-  doc.setFontSize(14); doc.setTextColor(30,64,175); doc.text(`Laporan HSE - ${findModule(sheet)?.label||sheet}`, 14, 15);
-  doc.setFontSize(9); doc.setTextColor(100); doc.text(`Digenerate: ${new Date().toLocaleString('id-ID')} • Oleh: ${state.user.name}`, 14, 21);
-  doc.autoTable({ head:[headers], body:rows, startY:25, styles:{fontSize:7,cellPadding:2}, headStyles:{fillColor:[30,64,175],textColor:255}, alternateRowStyles:{fillColor:[248,250,252]} });
-  doc.save(`HSE_${sheet}_${new Date().toISOString().slice(0,10)}.pdf`);
-  toast('PDF diunduh');
-}
+                    if (statusIdx !== -1 && row[statusIdx]) {
+                        let cellVal = row[statusIdx].toString().toLowerCase();
+                        if (cellVal.includes("unfit")) isUnfit = true;
+                        else if (cellVal.includes("fit")) isFit = true;
+                    } else {
+                        let rowStr = row.join(" ").toLowerCase();
+                        if (rowStr.includes("unfit")) isUnfit = true;
+                        else if (rowStr.match(/\bfit\b/)) isFit = true;
+                    }
 
-/* ------- Auto login ------- */
-(async () => {
-  const saved = localStorage.getItem('hse_user');
-  if (saved && !BACKEND_URL.includes('PASTE_WEB_APP_URL')) {
-    try { state.user = JSON.parse(saved); await bootApp(); } catch(e){ logout(); }
-  }
-})();
-</script>
+                    if (isUnfit) totalUnfit++;
+                    else if (isFit) totalFit++;
+                }
+            }
+
+            if (hazardSheet && hazardSheet.data.length > 1) {
+                totalHazard = hazardSheet.data.length - 1;
+                const headers = hazardSheet.data[0].map(h => h.toString().toLowerCase().trim());
+                let statusIdx = headers.findIndex(h => h.includes("status") && !h.includes("kerja")); 
+                if (statusIdx !== -1) {
+                    for(let i = 1; i < hazardSheet.data.length; i++) {
+                        let stat = hazardSheet.data[i][statusIdx] ? hazardSheet.data[i][statusIdx].toString().toLowerCase() : "";
+                        if(stat.includes("open") || stat.includes("belum") || stat.includes("outstanding")) openHazard++;
+                    }
+                }
+            }
+
+            if (insidenSheet && insidenSheet.data.length > 1) {
+                totalInsiden = insidenSheet.data.length - 1;
+                const headers = insidenSheet.data[0].map(h => h.toString().toLowerCase().trim());
+                let statusIdx = headers.findIndex(h => h.includes("status") && !h.includes("kerja")); 
+                if (statusIdx !== -1) {
+                    for(let i = 1; i < insidenSheet.data.length; i++) {
+                        let stat = insidenSheet.data[i][statusIdx] ? insidenSheet.data[i][statusIdx].toString().toLowerCase() : "";
+                        if(stat.includes("open") || stat.includes("investigasi") || stat.includes("belum")) openInsiden++;
+                    }
+                }
+            }
+
+            const container = document.getElementById('globalSummaryContainer');
+            container.innerHTML = `
+                <div class="widget-card glass-panel shine-effect gradient-border-hover">
+                    <div class="widget-icon icon-green"><i class="fas fa-user-check"></i></div>
+                    <div class="widget-info">
+                        <h3>${totalFit}</h3>
+                        <p>Karyawan FIT</p>
+                    </div>
+                </div>
+                <div class="widget-card glass-panel shine-effect gradient-border-hover">
+                    <div class="widget-icon icon-yellow"><i class="fas fa-user-injured"></i></div>
+                    <div class="widget-info">
+                        <h3>${totalUnfit}</h3>
+                        <p>Karyawan UNFIT</p>
+                    </div>
+                </div>
+                <div class="widget-card glass-panel shine-effect gradient-border-hover">
+                    <div class="widget-icon icon-blue"><i class="fas fa-triangle-exclamation"></i></div>
+                    <div class="widget-info">
+                        <h3>${totalHazard}</h3>
+                        <p>Total Hazard</p>
+                    </div>
+                </div>
+                <div class="widget-card glass-panel shine-effect gradient-border-hover">
+                    <div class="widget-icon icon-orange"><i class="fas fa-envelope-open-text"></i></div>
+                    <div class="widget-info">
+                        <h3>${openHazard}</h3>
+                        <p>Hazard Open</p>
+                    </div>
+                </div>
+                <div class="widget-card glass-panel shine-effect gradient-border-hover">
+                    <div class="widget-icon icon-purple"><i class="fas fa-truck-medical"></i></div>
+                    <div class="widget-info">
+                        <h3>${totalInsiden}</h3>
+                        <p>Total Kasus Insiden</p>
+                    </div>
+                </div>
+                <div class="widget-card glass-panel shine-effect gradient-border-hover">
+                    <div class="widget-icon icon-red"><i class="fas fa-magnifying-glass-chart"></i></div>
+                    <div class="widget-info">
+                        <h3>${openInsiden}</h3>
+                        <p>Insiden Investigasi</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getIndex(name) {
+            if (name.includes("karyawan")) return 0;
+            if (name.includes("penyerahan apd")) return 1;
+            if (name.includes("lokasi")) return 2;
+            if (name.includes("kategori") && name.includes("hse")) return 3;
+            if (name.includes("aset k3") || name === "aset k3") return 4;
+            if (name.includes("hazard")) return 5;
+            if (name.includes("insiden")) return 6;
+            if (name === "cpa" || name.includes("corrective")) return 7;
+            if (name.includes("inspeksi") && !name.includes("detail")) return 8;
+            if (name.includes("inspeksi") && name.includes("detail")) return 9;
+            if (name.includes("sertifikat")) return 10;
+            if (name.includes("apd") && name.includes("master")) return 11;
+            if (name.includes("checklist alat") || name.includes("mesin")) return 12;
+            if (name === "data alat") return 13; // Index untuk sheet Data Alat
+            return 999;
+        }
+
+        function renderDashboard(sheetsData) {
+            const tabsContainer = document.getElementById('tabsContainer');
+            const tablesContainer = document.getElementById('tablesContainer');
+            
+            tabsContainer.innerHTML = '';
+            tablesContainer.innerHTML = '';
+
+            let filteredSheets = sheetsData.filter(sheet => {
+                let name = sheet.sheetName.trim().toLowerCase();
+                return name !== "database" && name !== "login" && getIndex(name) <= 13; 
+            });
+
+            filteredSheets.sort((a, b) => {
+                let nameA = a.sheetName.trim().toLowerCase();
+                let nameB = b.sheetName.trim().toLowerCase();
+                return getIndex(nameA) - getIndex(nameB);
+            });
+
+            if(filteredSheets.length === 0) {
+                tablesContainer.innerHTML = '<div style="text-align:center; padding:50px;">Tidak ada data sheet yang dapat ditampilkan.</div>';
+                return;
+            }
+
+            let uniqueDept = new Set(), uniqueJabatan = new Set(), uniqueNama = new Set(), uniqueMcu = new Set();
+            let uniqueJenisAlat = new Set(), uniqueNamaAlat = new Set();
+
+            filteredSheets.forEach((sheet, index) => {
+                let iconClass = "fa-table";
+                const cleanName = sheet.sheetName.trim().toLowerCase();
+                
+                if (cleanName.includes("lokasi")) iconClass = "fa-map-location-dot"; 
+                else if (cleanName.includes("kategori")) iconClass = "fa-layer-group"; 
+                else if (cleanName.includes("karyawan")) iconClass = "fa-users-gear"; 
+                else if (cleanName.includes("aset")) iconClass = "fa-boxes-stacked";
+                else if (cleanName.includes("hazard")) iconClass = "fa-triangle-exclamation"; 
+                else if (cleanName.includes("insiden")) iconClass = "fa-truck-medical"; 
+                else if (cleanName.includes("inspeksi")) iconClass = "fa-clipboard-check";
+                else if (cleanName.includes("apd") && cleanName.includes("master")) iconClass = "fa-helmet-safety"; 
+                else if (cleanName.includes("penyerahan")) iconClass = "fa-people-carry-box";
+                else if (cleanName.includes("cpa") || cleanName.includes("corrective")) iconClass = "fa-screwdriver-wrench"; 
+                else if (cleanName.includes("sertifikat")) iconClass = "fa-award";
+                else if (cleanName.includes("checklist alat") || cleanName.includes("mesin")) iconClass = "fa-toolbox";
+                else if (cleanName === "data alat") iconClass = "fa-wrench"; // Ikon untuk Data Alat
+
+                const isKaryawanTab = cleanName.includes("karyawan");
+                const isChecklistTab = cleanName.includes("checklist alat") || cleanName.includes("mesin");
+                const isQrCodeRequired = cleanName === "aset k3" || cleanName === "data alat";
+
+                const li = document.createElement('li');
+                li.className = `nav-item shine-effect gradient-border-hover`;
+                li.id = `nav-item-${index}`;
+                li.innerHTML = `<i class="fas ${iconClass}"></i> <span>${sheet.sheetName}</span>`;
+                li.onclick = () => switchTab(index, sheet.sheetName);
+                tabsContainer.appendChild(li);
+
+                const view = document.createElement('div');
+                view.className = `sheet-view`;
+                view.id = `view-${index}`;
+
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-responsive';
+                const table = document.createElement('table');
+                
+                const thead = document.createElement('thead');
+                const tbody = document.createElement('tbody');
+
+                let emptyColIndices = [];
+                let hiddenColIndices = [];
+                let namaLengkapIdx = -1, fotoIdx = -1, stokIdx = -1, bufferIdx = -1, kategoriApdIdx = -1;
+                let qrValueIndex = -1; // Index yang menyimpan ID Aset atau Kode Alat untuk QR
+                
+                let freezeLimitIndex = -1; 
+
+                if (sheet.data && sheet.data.length > 0) {
+                    let totalColumns = sheet.data[0].length;
+                    for (let c = 0; c < totalColumns; c++) {
+                        let isColumnEntirelyEmpty = true;
+                        for (let r = 1; r < sheet.data.length; r++) {
+                            if (sheet.data[r][c] !== undefined && sheet.data[r][c] !== null && sheet.data[r][c].toString().trim() !== "") {
+                                isColumnEntirelyEmpty = false;
+                                break;
+                            }
+                        }
+                        if (isColumnEntirelyEmpty) emptyColIndices.push(c);
+                    }
+
+                    const headers = sheet.data[0].map(h => h ? h.toString().toLowerCase().trim() : "");
+                    hiddenColIndices = [...emptyColIndices];
+
+                    headers.forEach((h, idx) => {
+                        if (h === "id system" || h === "idsystem") hiddenColIndices.push(idx);
+                        
+                        if (isKaryawanTab) {
+                            if (h.includes("departemen") || h.includes("department")) filterColumnMap.dept = idx;
+                            if (h.includes("jabatan") || h.includes("position")) filterColumnMap.jabatan = idx;
+                            if (h.includes("nama lengkap") || h === "nama") { filterColumnMap.nama = idx; namaLengkapIdx = idx; }
+                            if (h.includes("status mcu") || h.includes("mcu")) filterColumnMap.mcu = idx;
+                            if (h.includes("foto") || h.includes("profile")) fotoIdx = idx;
+                        }
+
+                        if (isChecklistTab) {
+                            if (h === "jenis alat" || h.includes("jenis")) filterColumnMap.jenisAlat = idx;
+                            if (h === "nama alat" || h.includes("nama alat")) filterColumnMap.namaAlat = idx;
+                        }
+
+                        // Penentuan indeks Target Data QR Code
+                        if (isQrCodeRequired) {
+                            if (cleanName === "aset k3" && (h === "id aset" || h.includes("id aset"))) qrValueIndex = idx;
+                            if (cleanName === "data alat" && (h === "kode alat" || h.includes("kode alat"))) qrValueIndex = idx;
+                        }
+                    });
+
+                    // Sorting untuk checklist alat 
+                    if (isChecklistTab && filterColumnMap.jenisAlat !== -1 && filterColumnMap.namaAlat !== -1) {
+                        let headerRow = sheet.data[0];
+                        let dataRows = sheet.data.slice(1);
+                        
+                        dataRows.sort((a, b) => {
+                            let jenisA = (a[filterColumnMap.jenisAlat] || "").toString().toLowerCase();
+                            let jenisB = (b[filterColumnMap.jenisAlat] || "").toString().toLowerCase();
+                            if (jenisA < jenisB) return -1;
+                            if (jenisA > jenisB) return 1;
+                            let namaA = (a[filterColumnMap.namaAlat] || "").toString().toLowerCase();
+                            let namaB = (b[filterColumnMap.namaAlat] || "").toString().toLowerCase();
+                            if (namaA < namaB) return -1;
+                            if (namaA > namaB) return 1;
+                            return 0;
+                        });
+                        sheet.data = [headerRow, ...dataRows];
+                    }
+
+                    let idIdx = headers.findIndex(h => h.includes("id ") || h === "id");
+                    let jabatanIdx = headers.findIndex(h => h.includes("jabatan") || h.includes("position"));
+                    
+                    if (jabatanIdx !== -1) {
+                        freezeLimitIndex = jabatanIdx; 
+                    } else if (idIdx !== -1) {
+                        freezeLimitIndex = idIdx + 1;
+                    } else {
+                        freezeLimitIndex = 2; 
+                    }
+                    
+                    if (cleanName.includes("apd") && cleanName.includes("master")) {
+                        kategoriApdIdx = headers.findIndex(h => h.includes("kategori") || h.includes("category"));
+                        stokIdx = headers.findIndex(h => h === "stok" || h.includes("stock") || h.includes("jumlah"));
+                        bufferIdx = headers.findIndex(h => h.includes("buffer") || h.includes("batas"));
+                    }
+                }
+
+                const trHead = document.createElement('tr');
+
+                // Pembuatan Kolom QR Code Header
+                let appendQrColumn = isQrCodeRequired && qrValueIndex !== -1;
+
+                sheet.data.forEach((row, rowIndex) => {
+                    if (rowIndex === 0) {
+                        row.forEach((cell, colIndex) => {
+                            if (hiddenColIndices.includes(colIndex)) return; 
+                            const th = document.createElement('th');
+                            th.innerText = cell;
+                            
+                            if (colIndex <= freezeLimitIndex) {
+                                th.classList.add('sticky-col');
+                                th.setAttribute('data-sticky-col', colIndex);
+                            }
+                            trHead.appendChild(th);
+                        });
+                        
+                        // PERBAIKAN: Menambahkan kolom Header untuk Aksi QR agar berada di kanan dan Sticky
+                        if (appendQrColumn) {
+                            const thQr = document.createElement('th');
+                            thQr.innerText = "Aksi Sistem";
+                            thQr.style.textAlign = "center";
+                            thQr.classList.add('sticky-action-col');
+                            trHead.appendChild(thQr);
+                        }
+
+                        thead.appendChild(trHead);
+                    } else {
+                        if (isKaryawanTab && namaLengkapIdx !== -1) {
+                            let namaVal = row[namaLengkapIdx];
+                            if (!namaVal || namaVal.toString().trim() === "") return; 
+                        }
+                        
+                        if (cleanName.includes("apd") && cleanName.includes("master") && kategoriApdIdx !== -1) {
+                            let katVal = row[kategoriApdIdx] ? row[kategoriApdIdx].toString().toUpperCase() : "";
+                            if (katVal !== "ALAT PELINDUNG DIRI" && katVal !== "APD") return; 
+                        }
+
+                        const tr = document.createElement('tr');
+                        
+                        let isLowStock = false;
+                        if (stokIdx !== -1 && bufferIdx !== -1) {
+                            let stokVal = parseFloat(row[stokIdx]);
+                            let bufferVal = parseFloat(row[bufferIdx]);
+                            if (!isNaN(stokVal) && !isNaN(bufferVal) && bufferVal > stokVal) {
+                                isLowStock = true;
+                                tr.classList.add("warning-row");
+                            }
+                        }
+
+                        row.forEach((cell, colIndex) => {
+                            if (hiddenColIndices.includes(colIndex)) return;
+                            
+                            const td = document.createElement('td');
+                            let cellText = cell === null ? "" : cell.toString().trim();
+                            
+                            if (isKaryawanTab && cellText !== "") {
+                                if (colIndex === filterColumnMap.dept) uniqueDept.add(cellText);
+                                if (colIndex === filterColumnMap.jabatan) uniqueJabatan.add(cellText);
+                                if (colIndex === filterColumnMap.nama) uniqueNama.add(cellText);
+                                if (colIndex === filterColumnMap.mcu) uniqueMcu.add(cellText);
+                            }
+
+                            if (isChecklistTab && cellText !== "") {
+                                if (colIndex === filterColumnMap.jenisAlat) uniqueJenisAlat.add(cellText);
+                                if (colIndex === filterColumnMap.namaAlat) uniqueNamaAlat.add(cellText);
+                            }
+
+                            td.setAttribute('data-col', colIndex);
+                            td.setAttribute('data-col-val', cellText.toLowerCase());
+
+                            if (colIndex <= freezeLimitIndex) {
+                                td.classList.add('sticky-col');
+                                td.setAttribute('data-sticky-col', colIndex);
+                            }
+
+                            if (isLowStock && colIndex === stokIdx) {
+                                td.innerHTML = `<span style="color: var(--soft-red); font-weight: 700;">${cellText} <i class="fas fa-exclamation-triangle" style="margin-left: 5px;" title="Jumlah Buffer melebihi Stok"></i></span>`;
+                            } 
+                            else if (isKaryawanTab && colIndex === fotoIdx && cellText !== "") {
+                                if (cellText.includes("/") || cellText.toLowerCase().endsWith(".jpg") || cellText.toLowerCase().endsWith(".png")) {
+                                    let appNameEncoded = encodeURIComponent(APPSHEET_APP_NAME);
+                                    let tableNameEncoded = encodeURIComponent("Karyawan");
+                                    let fileNameEncoded = encodeURIComponent(cellText);
+                                    let imgSrc = `https://www.appsheet.com/template/gettablefileurl?appName=${appNameEncoded}&tableName=${tableNameEncoded}&fileName=${fileNameEncoded}`;
+                                    
+                                    let empName = (namaLengkapIdx !== -1 && row[namaLengkapIdx]) ? row[namaLengkapIdx].toString().trim() : 'Karyawan';
+                                    let fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(empName)}&background=e2e8f0&color=334155&size=50&rounded=false&bold=true`;
+                                    
+                                    td.innerHTML = `<img src="${imgSrc}" class="emp-photo gradient-border-hover" style="border-radius:6px;" alt="${empName}" onclick="openModal('${imgSrc}', '${empName}')" onerror="console.error('Gagal memuat gambar'); this.onerror=null; this.src='${fallbackUrl}';">`;
+                                } else {
+                                    td.innerText = cellText;
+                                }
+                            } else {
+                                td.innerText = cellText;
+                            }
+                            tr.appendChild(td);
+                        });
+
+                        // PERBAIKAN: Pembuatan Kolom Button QR Row (Sticky Kanan & Menonjol)
+                        if (appendQrColumn) {
+                            const tdQr = document.createElement('td');
+                            tdQr.style.textAlign = "center";
+                            tdQr.classList.add('sticky-action-col');
+                            let cellTarget = row[qrValueIndex] ? row[qrValueIndex].toString().trim() : "";
+                            
+                            if(cellTarget !== "") {
+                                tdQr.innerHTML = `<button class="btn-action-qr shine-effect" onclick="showQrModal('${cellTarget}')">
+                                    <i class="fas fa-qrcode"></i> Generate QR
+                                </button>`;
+                            }
+                            tr.appendChild(tdQr);
+                        }
+
+                        tbody.appendChild(tr);
+                    }
+                });
+
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                tableContainer.appendChild(table);
+                view.appendChild(tableContainer);
+                tablesContainer.appendChild(view);
+            });
+
+            populateDropdown('filterDept', uniqueDept);
+            populateDropdown('filterJabatan', uniqueJabatan);
+            populateDropdown('filterNama', uniqueNama);
+            populateDropdown('filterMcu', uniqueMcu);
+
+            populateDropdown('filterJenisAlat', uniqueJenisAlat);
+            populateDropdown('filterNamaAlat', uniqueNamaAlat);
+
+            switchTab(0, filteredSheets[0].sheetName);
+        }
+
+        function populateDropdown(elementId, uniqueSet) {
+            const select = document.getElementById(elementId);
+            if (!select) return;
+            select.innerHTML = select.options[0].outerHTML; 
+            
+            Array.from(uniqueSet).sort().forEach(val => {
+                let opt = document.createElement('option');
+                opt.value = val.toLowerCase();
+                opt.innerText = val.length > 40 ? val.substring(0, 40) + '...' : val;
+                select.appendChild(opt);
+            });
+        }
+
+        function switchTab(index, sheetName) {
+            const isKaryawanTab = sheetName.toLowerCase().includes("karyawan");
+            const isChecklistTab = sheetName.toLowerCase().includes("checklist alat") || sheetName.toLowerCase().includes("mesin");
+
+            const titleEl = document.getElementById('activeSheetTitle');
+            if (titleEl) titleEl.innerText = sheetName;
+            
+            // Reset Semua Filter
+            document.getElementById('tableSearch').value = '';
+            document.getElementById('filterDept').value = '';
+            document.getElementById('filterJabatan').value = '';
+            document.getElementById('filterNama').value = '';
+            document.getElementById('filterMcu').value = '';
+            
+            document.getElementById('filterJenisAlat').value = '';
+            document.getElementById('filterNamaAlat').value = '';
+
+            const karyawanPanel = document.getElementById('karyawanFilterPanel');
+            const checklistPanel = document.getElementById('checklistFilterPanel');
+
+            karyawanPanel.style.display = isKaryawanTab ? 'flex' : 'none';
+            checklistPanel.style.display = isChecklistTab ? 'flex' : 'none';
+
+            document.querySelectorAll('.nav-item').forEach((item, i) => {
+                if (i === index) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            document.querySelectorAll('.sheet-view').forEach((view, i) => {
+                if (i === index) {
+                    view.classList.add('active');
+                } else {
+                    view.classList.remove('active');
+                }
+            });
+
+            filterTableData();
+            setTimeout(() => calculateStickyLeftPositions(`view-${index}`), 50);
+
+            if (window.innerWidth <= 992) {
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            }
+        }
+
+        function calculateStickyLeftPositions(viewId) {
+            const view = document.getElementById(viewId);
+            if (!view) return;
+            const table = view.querySelector('table');
+            if (!table) return;
+
+            const firstRow = table.querySelector('thead tr');
+            if (!firstRow) return;
+
+            const stickyHeaders = firstRow.querySelectorAll('th.sticky-col');
+            let leftOffsets = [];
+            let currentLeft = 0;
+
+            stickyHeaders.forEach(th => {
+                leftOffsets.push(currentLeft);
+                currentLeft += th.offsetWidth;
+            });
+
+            const allRows = table.querySelectorAll('tr');
+            allRows.forEach(tr => {
+                const stickyCells = tr.querySelectorAll('.sticky-col');
+                stickyCells.forEach((cell, idx) => {
+                    if (leftOffsets[idx] !== undefined) {
+                        cell.style.left = leftOffsets[idx] + 'px';
+                    }
+                });
+            });
+        }
+
+        function filterTableData() {
+            const activeView = document.querySelector('.sheet-view.active');
+            if (!activeView) return;
+
+            const globalFilter = document.getElementById('tableSearch').value.toLowerCase().trim();
+            
+            const fDept = document.getElementById('filterDept').value;
+            const fJabatan = document.getElementById('filterJabatan').value;
+            const fNama = document.getElementById('filterNama').value;
+            const fMcu = document.getElementById('filterMcu').value;
+            
+            const fJenisAlat = document.getElementById('filterJenisAlat').value;
+            const fNamaAlat = document.getElementById('filterNamaAlat').value;
+
+            const isKaryawanTab = document.getElementById('karyawanFilterPanel').style.display === 'flex';
+            const isChecklistTab = document.getElementById('checklistFilterPanel').style.display === 'flex';
+
+            const rows = activeView.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                let matchGlobal = true, matchDept = true, matchJab = true, matchNama = true, matchMcu = true;
+                let matchJenis = true, matchNamaAlat = true;
+
+                if (globalFilter !== "") matchGlobal = row.textContent.toLowerCase().includes(globalFilter);
+
+                if (isKaryawanTab) {
+                    if (fDept !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.dept}"]`); if (!td || td.getAttribute('data-col-val') !== fDept) matchDept = false; }
+                    if (fJabatan !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.jabatan}"]`); if (!td || td.getAttribute('data-col-val') !== fJabatan) matchJab = false; }
+                    if (fNama !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.nama}"]`); if (!td || td.getAttribute('data-col-val') !== fNama) matchNama = false; }
+                    if (fMcu !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.mcu}"]`); if (!td || td.getAttribute('data-col-val') !== fMcu) matchMcu = false; }
+                }
+
+                if (isChecklistTab) {
+                    if (fJenisAlat !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.jenisAlat}"]`); if (!td || td.getAttribute('data-col-val') !== fJenisAlat) matchJenis = false; }
+                    if (fNamaAlat !== "") { let td = row.querySelector(`td[data-col="${filterColumnMap.namaAlat}"]`); if (!td || td.getAttribute('data-col-val') !== fNamaAlat) matchNamaAlat = false; }
+                }
+
+                if (matchGlobal && matchDept && matchJab && matchNama && matchMcu && matchJenis && matchNamaAlat) row.style.display = '';
+                else row.style.display = 'none';
+            });
+        }
+
+        // ==========================================
+        // FUNGSI MULTIMEDIA & MODAL
+        // ==========================================
+        function openModal(imgSrc, captionText) {
+            const modal = document.getElementById('photoModal');
+            const modalImg = document.getElementById('modalImg');
+            const caption = document.getElementById('modalCaption');
+            
+            modal.style.display = "block";
+            modalImg.src = imgSrc;
+            caption.innerHTML = captionText;
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeModal(event) {
+            const modal = document.getElementById('photoModal');
+            if (!event || event.target.className === 'close-modal' || event.target.className === 'photo-modal') {
+                modal.style.display = "none";
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // ==========================================
+        // FUNGSI MODAL & GENERATE QR CODE ALAT/ASET
+        // ==========================================
+        function showQrModal(qrValue) {
+            const modal = document.getElementById('qrModal');
+            const container = document.getElementById('qrCodeContainer');
+            const title = document.getElementById('qrTitle');
+
+            title.innerText = qrValue; 
+            container.innerHTML = ""; 
+
+            qrCodeInstance = new QRCode(container, {
+                text: qrValue,
+                width: 220,
+                height: 220,
+                colorDark : "#334155", 
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            modal.style.display = "block";
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeQrModal(event) {
+            const modal = document.getElementById('qrModal');
+            if (!event || event.target.className === 'close-modal' || event.target.className === 'photo-modal') {
+                modal.style.display = "none";
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function downloadQRCode() {
+            const qrCanvas = document.querySelector("#qrCodeContainer canvas");
+            if (!qrCanvas) { alert("QR Code belum ter-generate."); return; }
+            
+            const dataUrl = qrCanvas.toDataURL("image/png");
+            const title = document.getElementById('qrTitle').innerText;
+            const a = document.createElement("a");
+            a.href = dataUrl;
+            a.download = `QR_Code_${title}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function printQRCode() {
+            const qrCanvas = document.querySelector("#qrCodeContainer canvas");
+            if (!qrCanvas) { alert("QR Code belum ter-generate."); return; }
+
+            const dataUrl = qrCanvas.toDataURL("image/png");
+            const title = document.getElementById('qrTitle').innerText;
+            
+            const printWin = window.open('', '_blank');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>Print Label QR - ${title}</title>
+                    <style>
+                        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff;}
+                        .label-card { border: 2px dashed #000; padding: 30px; text-align: center; border-radius: 12px;}
+                        img { max-width: 250px; display: block; margin: 0 auto;}
+                        h2 { margin-top: 20px; font-size: 26px; color: #000; letter-spacing: 1px; margin-bottom: 5px;}
+                        p { font-size: 14px; font-weight: bold; color: #555; text-transform: uppercase;}
+                    </style>
+                </head>
+                <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+                    <div class="label-card">
+                        <img src="${dataUrl}" alt="QR Code ${title}"/>
+                        <h2>${title}</h2>
+                        <p>PT Murinda Sentra Baja</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        }
+
+        // ==========================================
+        // FUNGSI MODAL CHECKLIST ALAT & MESIN (BARU)
+        // ==========================================
+        function showChecklistModal() {
+            const modal = document.getElementById('checklistModal');
+            const container = document.getElementById('checklistQrContainer');
+            
+            container.innerHTML = "";
+            
+            new QRCode(container, {
+                text: "https://murindasentrabaja.github.io/Checklist-Alat-dan-Mesin-HSE/",
+                width: 220,
+                height: 220,
+                colorDark : "#334155",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            
+            modal.style.display = "block";
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeChecklistModal(event) {
+            const modal = document.getElementById('checklistModal');
+            if (!event || event.target.className === 'close-modal' || event.target.className === 'photo-modal') {
+                modal.style.display = "none";
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function copyChecklistLink() {
+            const copyText = document.getElementById("checklistLinkInput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(copyText.value).then(() => {
+                    alert("Link berhasil disalin!");
+                }).catch(err => {
+                    document.execCommand('copy');
+                    alert("Link berhasil disalin!");
+                });
+            } else {
+                document.execCommand('copy');
+                alert("Link berhasil disalin!");
+            }
+        }
+
+        function printChecklistQR() {
+            const qrCanvas = document.querySelector("#checklistQrContainer canvas");
+            if (!qrCanvas) { alert("QR Code belum ter-generate."); return; }
+
+            const dataUrl = qrCanvas.toDataURL("image/png");
+            
+            const printWin = window.open('', '_blank');
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>Print Label QR - Checklist Alat & Mesin</title>
+                    <style>
+                        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff;}
+                        .label-card { border: 2px dashed #000; padding: 30px; text-align: center; border-radius: 12px;}
+                        img { max-width: 250px; display: block; margin: 0 auto;}
+                        h2 { margin-top: 20px; font-size: 24px; color: #000; letter-spacing: 1px; margin-bottom: 5px;}
+                        p { font-size: 14px; font-weight: bold; color: #555; text-transform: uppercase;}
+                    </style>
+                </head>
+                <body onload="setTimeout(function(){ window.print(); window.close(); }, 500);">
+                    <div class="label-card">
+                        <img src="${dataUrl}" alt="QR Code Checklist"/>
+                        <h2>Checklist Alat & Mesin</h2>
+                        <p>PT Murinda Sentra Baja</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        }
+
+        function exportToExcel() {
+            if (!globalData || globalData.length === 0) {
+                alert("Tidak ada data untuk diekspor.");
+                return;
+            }
+            const wb = XLSX.utils.book_new();
+            globalData.forEach(sheet => {
+                if(sheet.sheetName.trim().toLowerCase() !== "database" && sheet.sheetName.trim().toLowerCase() !== "login") {
+                    const ws = XLSX.utils.aoa_to_sheet(sheet.data);
+                    XLSX.utils.book_append_sheet(wb, ws, sheet.sheetName.substring(0, 31));
+                }
+            });
+            const date = new Date().toISOString().slice(0,10);
+            XLSX.writeFile(wb, `HSE_Report_MSB_${date}.xlsx`);
+        }
+        
+        window.onload = () => {
+            fetchData();
+        };
+
+        window.addEventListener('resize', () => {
+            const activeView = document.querySelector('.sheet-view.active');
+            if (activeView) calculateStickyLeftPositions(activeView.id);
+        });
+    </script>
 </body>
 </html>
